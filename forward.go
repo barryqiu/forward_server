@@ -2,8 +2,14 @@ package main
 
 import "fmt"
 
-func main()  {
-	slice := []byte {'a', 'b', 'c', 'd'}
+var HOST = ""
+var PORT = 8000
+
+func main() {
+	slice := []byte{'a'}
 	slice = slice[1:]
-	fmt.Printf("%s", slice)
+	fmt.Printf("%d", len(slice))
+
+	start_phones()
+
 }
