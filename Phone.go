@@ -5,6 +5,7 @@ import (
 	"net"
 	"sync"
 	"time"
+	"strings"
 )
 
 type Phone struct {
@@ -188,6 +189,29 @@ func test_phone(address net.TCPAddr, phone Phone) {
 	// read or write on conn
 }
 
-func process_phone_conn(conn net.TCPConn, phone Phone) {
+func process_phone_conn(conn net.TCPConn, phones Phone) {
+	if nil == conn {
+		return
+	}
+	var buf = make([]byte, 4096)
+	n, err := conn.Read(buf)
+	if err != nil {
+		log.Println("conn read error:", err)
+		return
+	}
+	first_line := string(buf[:n])
+
+	pos :=strings.Index(first_line, "/")
+	if pos == -1{
+		conn.Close()
+		return
+	}
+
+	if  strings.HasPrefix(first_line, "GET /register_"){
+		// 解析HTTP头
+	}
+
+	if strings.HasPrefix(first_line, "WEBKEY"){
+	}
 
 }
