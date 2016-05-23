@@ -10,6 +10,8 @@ func main() {
 	slice = slice[1:]
 	fmt.Printf("%d", len(slice))
 
+	fmt.Println(HOST,PORT)
+
 	start_phones()
 
 }
