@@ -6,6 +6,10 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"os"
+	"bufio"
+	"io"
+	"fmt"
 )
 
 type Phone struct {
@@ -141,12 +145,51 @@ func (phone Phone) init(user_name string, random string, conn net.TCPConn, addre
 	return nil
 }
 
+func (phone Phone) add_to_file() error {
+	fl, err := os.OpenFile(db_file_name, os.O_CREATE | os.O_APPEND | os.O_RDWR, 0660)
+	defer fl.Close()
+	if (err != nil) {
+		log.Println("open file error", err)
+		return err
+	}
+	fl.WriteString(phone.User_name + " " + phone.Random + "\n")
+	return nil
+}
+
+/**
+read phone‘s info from file
+ */
+func read_phones_from_file() {
+	fl, err := os.Open(db_file_name)
+	if err != nil {
+		log.Println("open file error", err)
+		return
+	}
+	defer fl.Close()
+	buff := bufio.NewReader(fl)
+	for {
+		line, err := buff.ReadString('\n')
+		if err != nil || io.EOF == err {
+			break
+		}
+		infos := strings.Split(" ", line)
+		if len(infos) == 2 {
+			phone := Phone{}
+			phone.User_name = infos[0]
+			phone.Random = infos[1]
+			phones = append(phones, phone)
+		}
+	}
+}
+
 /**
 start phone thread to listen request from yun phone
 */
 func start_phones() {
 
-	add, err := net.ResolveTCPAddr("tcp", ":110")
+	read_phones_from_file()
+
+	add, err := net.ResolveTCPAddr("tcp", ":8110")
 	if err != nil {
 		log.Println("error listen:", err)
 		return
@@ -159,15 +202,13 @@ func start_phones() {
 	defer listen.Close()
 	log.Println("listen ok")
 
-	var phones []Phone
-
 	var i int
 	for {
 		conn, err := listen.AcceptTCP()
 		if err != nil {
 			log.Println("accept error:", err)
 		}
-		go process_phone_conn(*conn, phones)
+		go process_phone_conn(*conn)
 		log.Printf("%d: accept a new connection\n", i)
 	}
 }
@@ -196,7 +237,7 @@ func test_phone(address net.TCPAddr, phone Phone) {
 	// read or write on conn
 }
 
-func process_phone_conn(conn net.TCPConn, phones []Phone) {
+func process_phone_conn(conn net.TCPConn) {
 	if (net.TCPConn{}) == conn {
 		return
 	}
@@ -207,6 +248,8 @@ func process_phone_conn(conn net.TCPConn, phones []Phone) {
 		return
 	}
 	first_line := string(buf[:n])
+
+	fmt.Println(first_line)
 
 	pos := strings.Index(first_line, "/")
 	if pos == -1 {
@@ -220,15 +263,33 @@ func process_phone_conn(conn net.TCPConn, phones []Phone) {
 			log.Println("conn read error:", err)
 			return
 		}
-		infos :=strings.Split(req.RequestURI, "/")
+		infos := strings.Split(req.RequestURI, "/")
 		user_name := infos[1]
 		random := infos[2]
 		version := infos[3]
-		log.Println("user_name:" + user_name +";random:" + random +";version:" + version)
+		log.Println("user_name:" + user_name + ";random:" + random + ";version:" + version)
 
-		if len(user_name) == 0{
+		if len(user_name) == 0 {
 			conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\nEmpty username is not allowed."))
+			conn.Close()
+			return
 		}
+
+		for _, one_phone :=range phones {
+			if (one_phone.User_name == user_name &&	one_phone.Random != random ){
+				conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\nUsername is already used."))
+				conn.Close()
+				return
+			}
+		}
+
+		phone := Phone{}
+		phone.User_name = user_name
+		phone.Random = random
+		phone.add_to_file()
+		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\nOK"))
+		conn.Close()
+		return
 
 	}
 
