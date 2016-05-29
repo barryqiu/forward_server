@@ -177,7 +177,7 @@ test the phone conn
 */
 func test_phone(address net.TCPAddr, phone Phone) {
 	log.Println("test routine start")
-	conn, err := net.DialTimeout("tcp", address.String(), 2*time.Second)
+	conn, err := net.DialTimeout("tcp", address.String(), 2 * time.Second)
 	defer conn.Close()
 	if err != nil {
 		log.Println("dial  error:", err)
@@ -215,7 +215,21 @@ func process_phone_conn(conn net.TCPConn, phones []Phone) {
 	}
 
 	if strings.HasPrefix(first_line, "GET /register_") {
-		// 解析HTTP头
+		req, err := getRequestInfo(first_line)
+		if err != nil {
+			log.Println("conn read error:", err)
+			return
+		}
+		infos :=strings.Split(req.RequestURI, "/")
+		user_name := infos[1]
+		random := infos[2]
+		version := infos[3]
+		log.Println("user_name:" + user_name +";random:" + random +";version:" + version)
+
+		if len(user_name) == 0{
+			conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\nEmpty username is not allowed."))
+		}
+
 	}
 
 	if strings.HasPrefix(first_line, "WEBKEY") {
