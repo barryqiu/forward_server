@@ -16,9 +16,8 @@ type Phone struct {
 	mu             sync.Mutex
 	Conn_list      []net.TCPConn
 	User_name      string
-	Random         string
-	Last_known     net.TCPAddr
-	Redirect       net.TCPAddr
+    	Random         string
+	Last_known     string
 	Overhead       int
 	Overheat_count int
 }
@@ -38,9 +37,7 @@ func (phone Phone) append_conn(conn net.TCPConn) error {
 
 	phone.Conn_list = append(phone.Conn_list, conn)
 
-	address := conn.RemoteAddr()
-
-	if len(phone.Conn_list) > phone.Overhead {
+	if len(phone.Conn_list) > 3 + phone.Overhead {
 		conn0 := phone.Conn_list[0]
 		err = conn0.Close()
 		if err != nil {
@@ -59,9 +56,12 @@ func (phone Phone) append_conn(conn net.TCPConn) error {
 
 	}
 
-	if phone.Last_known.String() != address.String() {
-		log.Println("not last knoen ip")
-		log.Println("Last known IP:" + phone.Last_known.String() + "new:" + address.String())
+	address := conn.RemoteAddr()
+	ip := strings.Split(address.String(),":")[0]
+
+	if phone.Last_known != ip{
+		log.Println("not last known ip")
+		log.Println("Last known IP:" + phone.Last_known + "new:" + ip)
 		for len(phone.Conn_list) > 1 {
 			conn0 := phone.Conn_list[0]
 			err = conn0.Close()
@@ -70,23 +70,9 @@ func (phone Phone) append_conn(conn net.TCPConn) error {
 			}
 			phone.Conn_list = phone.Conn_list[1:]
 		}
-		phone.Last_known = address
-		phone.Redirect = net.TCPAddr{}
+		phone.Last_known = ip
 		phone.Overheat_count = 0
 		phone.Overhead = 0
-		go test_phone(address, phone)
-	}
-
-	if phone.Redirect.IP != nil {
-		conn.Write([]byte("stop"))
-		for len(phone.Conn_list) > 0 {
-			conn0 := phone.Conn_list[0]
-			err = conn0.Close()
-			if err != nil {
-				log.Println("close conn error:", err)
-			}
-			phone.Conn_list = phone.Conn_list[1:]
-		}
 	}
 
 	phone.mu.Unlock()
@@ -136,12 +122,11 @@ func (phone Phone) close_all_conn() error {
 func (phone Phone) init(user_name string, random string, conn net.TCPConn, address net.TCPAddr) error {
 	phone.User_name = user_name
 	phone.Random = random
-	phone.Last_known = net.TCPAddr{}
-	phone.Redirect = net.TCPAddr{}
+	phone.Last_known = ""
 	phone.Overhead = 0
 	phone.Overheat_count = 0
 	if conn == (net.TCPConn{}) {
-		phone.append_conn(conn, address)
+		phone.append_conn(conn)
 	}
 
 	return nil
@@ -217,29 +202,6 @@ func start_phones() {
 	}
 }
 
-/**
-test the phone conn
-*/
-func test_phone(address net.TCPAddr, phone Phone) {
-	log.Println("test routine start")
-	conn, err := net.DialTimeout("tcp", address.String(), 2 * time.Second)
-	defer conn.Close()
-	if err != nil {
-		log.Println("dial  error:", err)
-	}
-	conn.Write([]byte("GET /test HTTP/1.1\r\nHOST: anything\r\n\r\n"))
-	var data []byte
-	n, err := conn.Read(data)
-	if err != nil {
-		log.Println("dial  error:", err)
-	}
-	log.Println("test routine receive data ", data)
-	if n > 0 && string(data) == "Webkey" {
-		phone.Redirect = address
-	}
-	log.Println("it can be redirected to ", address)
-	// read or write on conn
-}
 
 func process_phone_conn(conn net.TCPConn) {
 	if (net.TCPConn{}) == conn {
@@ -294,7 +256,8 @@ func process_phone_conn(conn net.TCPConn) {
 	}
 
 	if strings.HasPrefix(content, "WEBKEY") {
-		// WEBKEY username/random/version:port
+		// WEBKEY username/random/version/port
+		// WEBKEY username/random/1.0/888
 		lines := strings.Split(content, "/r/n")
 		if len(lines) > 0 {
 			first_line := lines[0]
@@ -323,6 +286,7 @@ func process_phone_conn(conn net.TCPConn) {
 				phone.add_to_file()
 				phones[user_name] = phone
 				phones[user_name].append_conn(conn)
+				log.Println("new phone ", user_name)
 			} else {
 				conn.Write([]byte("stop"))
 				conn.Close()
