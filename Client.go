@@ -86,7 +86,8 @@ func processClientReq(conn net.TCPConn) {
 	var phone_conn net.TCPConn
 	for {
 		phone_conn, err = phones[device_name].get_conn()
-		if err != nil {
+		log.Println(err)
+		if (net.TCPConn{}) == phone_conn || err != nil{
 			log.Println("no phone conn error:", err)
 			conn.Write([]byte(errHTML))
 			return
