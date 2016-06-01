@@ -90,6 +90,7 @@ func processClientReq(conn net.TCPConn) {
 		if (net.TCPConn{}) == phone_conn || err != nil{
 			log.Println("no phone conn error:", err)
 			conn.Write([]byte(errHTML))
+			conn.Close()
 			return
 		}
 
