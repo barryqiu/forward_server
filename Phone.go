@@ -61,7 +61,7 @@ func (phone Phone) append_conn(conn net.TCPConn) error {
 
 	if phone.Last_known != ip{
 		log.Println("not last known ip")
-		log.Println("Last known IP:" + phone.Last_known + "new:" + ip)
+		log.Println("Last known IP:" + phone.Last_known + ", new:" + ip)
 		for len(phone.Conn_list) > 1 {
 			conn0 := phone.Conn_list[0]
 			err = conn0.Close()
@@ -97,6 +97,8 @@ func (phone Phone) get_conn() (conn net.TCPConn, err error) {
 
 	conn0 := phone.Conn_list[0]
 	phone.Conn_list = phone.Conn_list[1:]
+
+	log.Println(phone.User_name, "return conn", conn0.RemoteAddr().String())
 
 	phone.mu.Unlock()
 	return conn0, nil
@@ -184,18 +186,16 @@ func start_phones() {
 		log.Println("error listen:", err)
 		return
 	}
-	fmt.Println("start listen 110")
 	defer listen.Close()
-	log.Println("listen ok")
+	log.Println("listen 110 ok")
 
-	var i int
 	for {
 		conn, err := listen.AcceptTCP()
 		if err != nil {
 			log.Println("accept error:", err)
 		}
 		go process_phone_conn(*conn)
-		log.Printf("%d: accept a new connection\n", i)
+		log.Println("accept a new phone connection")
 	}
 }
 
@@ -207,7 +207,7 @@ func process_phone_conn(conn net.TCPConn) {
 	var buf = make([]byte, 4096)
 	n, err := conn.Read(buf)
 	if err != nil {
-		log.Println("conn read error:", err)
+		log.Println("phone conn read error:", err)
 		return
 	}
 	content := string(buf[:n])
@@ -221,14 +221,14 @@ func process_phone_conn(conn net.TCPConn) {
 	if strings.HasPrefix(content, "GET /register_") {
 		req, err := getRequestInfo(content)
 		if err != nil {
-			log.Println("conn read error:", err)
+			log.Println("phone conn read error:", err)
 			return
 		}
 		infos := strings.Split(req.RequestURI, "/")
 		user_name := infos[2]
 		random := infos[3]
 		version := infos[4]
-		log.Println("user_name:" + user_name + ";random:" + random + ";version:" + version)
+		log.Println("reg:user_name:" + user_name + ";random:" + random + ";version:" + version)
 
 		if len(user_name) == 0 {
 			conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\nEmpty username is not allowed."))
@@ -274,6 +274,7 @@ func process_phone_conn(conn net.TCPConn) {
 			}
 
 			if _, ok := phones[user_name]; ok && phones[user_name].Random == random {
+				log.Println(user_name, " phone append a conn", conn.RemoteAddr().String())
 				phones[user_name].append_conn(conn)
 				return
 			} else if _, ok := phones[user_name]; !ok {

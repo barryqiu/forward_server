@@ -27,7 +27,7 @@ func processClientReq(conn net.TCPConn) {
 		var buf = make([]byte, 16)
 		n, err := conn.Read(buf)
 		if err != nil {
-			log.Println("conn read error:", err)
+			log.Println("cleint conn read error:", err)
 			conn.Write([]byte(errHTML))
 			conn.Close()
 			return
@@ -43,7 +43,7 @@ func processClientReq(conn net.TCPConn) {
 
 	req, err := getRequestInfo(string(header))
 	if err != nil {
-		log.Println("conn read error:", err)
+		log.Println("client conn read error:", err)
 		conn.Write([]byte(errHTML))
 		conn.Close()
 		return
@@ -87,7 +87,7 @@ func processClientReq(conn net.TCPConn) {
 	for {
 		phone_conn, err = phones[device_name].get_conn()
 		if err != nil {
-			log.Println("no conn error:", err)
+			log.Println("no phone conn error:", err)
 			conn.Write([]byte(errHTML))
 			return
 		}
@@ -96,15 +96,16 @@ func processClientReq(conn net.TCPConn) {
 		data := append(new_header, body...)
 		if (strings.Contains(uri, "/testconn")) {
 			data = []byte("GET /test HTTP/1.1\r\nHOST: anything\r\n\r\n")
+			log.Println(device_name, "test conn")
 		}
 		_, err = phone_conn.Write(data)
+		log.Println("new request data", string(data))
 		if err != nil {
 			log.Println("send error", err)
 		} else {
 			break
 		}
 		phone_conn.Close()
-		log.Println("new header", string(data))
 	}
 
 

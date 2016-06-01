@@ -6,21 +6,25 @@ import (
 	"net/http"
 	"log"
 	"net"
+	"os"
 )
 
 var phones map[string]Phone
 var db_file_name string = "phones.txt"
 
 func main() {
+
+	f, err := os.OpenFile("testlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	log.SetOutput(f)
+
 	phones = make(map[string]Phone)
 	test()
 	go start_phones()
-	//http.HandleFunc("/", processClientReq) //设置访问的路由
-	//err := http.ListenAndServe(":8000", nil) //设置监听的端口
-	//if err != nil {
-	//	log.Fatal("ListenAndServe: ", err)
-	//}
-	//fmt.Println("start listen 8000")
 
 	add, err := net.ResolveTCPAddr("tcp", ":8000")
 	if err != nil {
@@ -33,15 +37,15 @@ func main() {
 		return
 	}
 	defer listen.Close()
-	log.Println("listen 8000 ok")
+	log.Println("client listen 8000 ok")
 
 	for {
 		conn, err := listen.AcceptTCP()
 		if err != nil {
-			log.Println("accept error:", err)
+			log.Println("client accept error:", err)
 		}
 		go processClientReq(*conn)
-		log.Printf("accept a new connection\n")
+		log.Printf("accept a new client connection\n")
 	}
 }
 
