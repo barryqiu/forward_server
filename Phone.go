@@ -10,6 +10,7 @@ import (
 	"bufio"
 	"io"
 	"fmt"
+	"errors"
 )
 
 type Phone struct {
@@ -92,7 +93,7 @@ func (phone Phone) get_conn() (conn net.TCPConn, err error) {
 	if len(phone.Conn_list) == 0 {
 		log.Println("Got signal , bu no connection " + phone.User_name)
 		phone.mu.Unlock()
-		return net.TCPConn{}, nil
+		return net.TCPConn{}, errors.New("no connect")
 	}
 
 	conn0 := phone.Conn_list[0]
