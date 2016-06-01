@@ -96,9 +96,6 @@ func (phone Phone) get_conn() (conn net.TCPConn, err error) {
 	}
 
 	conn0 := phone.Conn_list[0]
-	if err != nil {
-		log.Println("close conn error:", err)
-	}
 	phone.Conn_list = phone.Conn_list[1:]
 
 	phone.mu.Unlock()
