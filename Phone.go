@@ -9,7 +9,6 @@ import (
 	"os"
 	"bufio"
 	"io"
-	"fmt"
 	"errors"
 )
 
@@ -17,7 +16,7 @@ type Phone struct {
 	mu             sync.Mutex
 	Conn_list      []net.TCPConn
 	User_name      string
-    	Random         string
+	Random         string
 	Last_known     string
 	Overhead       int
 	Overheat_count int
@@ -58,9 +57,9 @@ func (phone Phone) append_conn(conn net.TCPConn) error {
 	}
 
 	address := conn.RemoteAddr()
-	ip := strings.Split(address.String(),":")[0]
+	ip := strings.Split(address.String(), ":")[0]
 
-	if phone.Last_known != ip{
+	if phone.Last_known != ip {
 		log.Println("not last known ip")
 		log.Println("Last known IP:" + phone.Last_known + ", new:" + ip)
 		for len(phone.Conn_list) > 1 {
@@ -200,7 +199,6 @@ func start_phones() {
 	}
 }
 
-
 func process_phone_conn(conn net.TCPConn) {
 	if (net.TCPConn{}) == conn {
 		return
@@ -268,7 +266,7 @@ func process_phone_conn(conn net.TCPConn) {
 			p3 := strings.Index(first_line[p2 + 1:], "/") + p2 + 1
 			version := first_line[p2 + 1 : p3]
 			port := first_line[p3 + 1:]
-			fmt.Println(user_name, random, version, port)
+			log.Println("WEBKEY:", user_name, random, version, port)
 
 			if len(user_name) <= 0 || len(random) <= 0 {
 				conn.Write([]byte("stop"))
