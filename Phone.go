@@ -213,6 +213,8 @@ func process_phone_conn(conn net.TCPConn) {
 	}
 	content := string(buf[:n])
 
+	log.Println(content)
+
 	pos := strings.Index(content, "/")
 	if pos == -1 {
 		conn.Close()
