@@ -269,6 +269,7 @@ func process_phone_conn(conn net.TCPConn) {
 			log.Println("WEBKEY:", user_name, random, version, port)
 
 			if len(user_name) <= 0 || len(random) <= 0 {
+				log.Println("user_name or random len = 0")
 				conn.Write([]byte("stop"))
 				conn.Close()
 				return
