@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-var phones map[string]Phone
+var phones map[string] *Phone
 var db_file_name string = "phones.txt"
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 
 	log.SetOutput(f)
 
-	phones = make(map[string]Phone)
+	phones = make(map[string]*Phone)
 	test()
 	go start_phones()
 

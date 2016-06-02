@@ -23,6 +23,7 @@ type Phone struct {
 
 func (phone Phone) append_conn(conn net.TCPConn) error {
 	phone.mu.Lock()
+	log.Println(phone)
 
 	err := conn.SetKeepAlive(true)
 	if err != nil {
@@ -74,7 +75,7 @@ func (phone Phone) append_conn(conn net.TCPConn) error {
 		phone.Overhead = 0
 	}
 
-	log.Println(phone, phone.User_name, phone.Last_known,phone.Conn_list[0].RemoteAddr(), len(phone.Conn_list))
+	log.Println(phone)
 
 	phone.mu.Unlock()
 	return nil
@@ -164,7 +165,7 @@ func read_phones_from_file() {
 			phone := Phone{}
 			phone.User_name = infos[0]
 			phone.Random = infos[1]
-			phones[infos[0]] = phone
+			phones[infos[0]] = &phone
 		}
 	}
 
@@ -251,7 +252,7 @@ func process_phone_conn(conn net.TCPConn) {
 		phone.User_name = user_name
 		phone.Random = random
 		phone.add_to_file()
-		phones[user_name] = phone
+		phones[user_name] = &phone
 		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\nOK"))
 		conn.Close()
 		return
@@ -290,7 +291,7 @@ func process_phone_conn(conn net.TCPConn) {
 				phone.User_name = user_name
 				phone.Random = random
 				phone.add_to_file()
-				phones[user_name] = phone
+				phones[user_name] = &phone
 				phones[user_name].append_conn(conn)
 				log.Println("new phone ", user_name)
 			} else {
