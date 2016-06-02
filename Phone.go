@@ -10,7 +10,6 @@ import (
 	"bufio"
 	"io"
 	"errors"
-	"fmt"
 )
 
 type Phone struct {
