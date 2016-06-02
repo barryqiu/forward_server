@@ -62,7 +62,7 @@ func processClientReq(conn net.TCPConn) {
 
 	}
 	uri := req.RequestURI
-	//log.Println("URI:", uri)
+	log.Println("URI:", uri)
 	infos := strings.Split(uri, "/")
 	if (len(infos) <= 1) {
 		conn.Write([]byte(errHTML))
@@ -129,6 +129,6 @@ func processClientReq(conn net.TCPConn) {
 		data_len += n
 	}
 	conn.Close()
-	//log.Println(uri, "receive", data_len)
+	log.Println(uri, "receive", data_len)
 	phone_conn.Close()
 }
