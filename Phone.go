@@ -293,7 +293,7 @@ func process_phone_conn(conn net.TCPConn) {
 				log.Println("new phone ", user_name)
 			} else {
 				log.Println("stop phone old phone random: ", phones[user_name].Random)
-				conn.Write([]byte("stop"))
+				//conn.Write([]byte("stop"))
 				conn.Close()
 				log.Println("no thing matched")
 				return
