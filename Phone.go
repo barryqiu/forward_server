@@ -44,6 +44,7 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 		}
 		phone.Conn_list = phone.Conn_list[1:]
 
+		phone.Overheat_count += 1
 		if phone.Overheat_count > 100 {
 			phone.Overheat_count = 0
 			if phone.Overhead > 10 {
@@ -212,8 +213,6 @@ func process_phone_conn(conn net.TCPConn) {
 	}
 	content := string(buf[:n])
 
-	log.Println("phone send :", content)
-
 	pos := strings.Index(content, "/")
 	if pos == -1 {
 		conn.Close()
@@ -264,10 +263,6 @@ func process_phone_conn(conn net.TCPConn) {
 			user_name := first_line[7:p1]
 			p2 := strings.Index(first_line[p1 + 1:], "/") + p1 + 1
 			random := first_line[p1 + 1 : p2]
-			p3 := strings.Index(first_line[p2 + 1:], "/") + p2 + 1
-			version := first_line[p2 + 1 : p3]
-			port := first_line[p3 + 1:]
-			log.Println("WEBKEY:", user_name, random, version, port)
 
 			if len(user_name) <= 0 || len(random) <= 0 {
 				log.Println("user_name or random len = 0")

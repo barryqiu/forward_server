@@ -5,6 +5,7 @@ import (
 	"net"
 	"bytes"
 	"strings"
+	"io"
 )
 // 策略:
 // 使用一个全局的slice数组存储所有的Phone
@@ -86,7 +87,7 @@ func processClientReq(conn net.TCPConn) {
 	var phone_conn net.TCPConn
 	for {
 		phone_conn, err = phones[device_name].get_conn()
-		if (net.TCPConn{}) == phone_conn || err != nil{
+		if (net.TCPConn{}) == phone_conn || err != nil {
 			log.Println("no phone conn error:", err)
 			conn.Write([]byte(errHTML))
 			conn.Close()
@@ -109,21 +110,25 @@ func processClientReq(conn net.TCPConn) {
 		phone_conn.Close()
 	}
 
-
+	data_len := 0
 	for {
 		var buf = make([]byte, 4096)
 		n, err := phone_conn.Read(buf)
+
+		if n == 0 || err == io.EOF {
+			break
+		}
+
 		if err != nil {
 			log.Println("conn read error:", err)
 			conn.Write([]byte(errHTML))
 			conn.Close()
 			return
 		}
-		if n == 0{
-			break
-		}
 		conn.Write(buf[:n])
+		data_len += n
 	}
 	conn.Close()
+	log.Println(uri, "receive", data_len)
 	phone_conn.Close()
 }
