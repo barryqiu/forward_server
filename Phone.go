@@ -74,6 +74,8 @@ func (phone Phone) append_conn(conn net.TCPConn) error {
 		phone.Overhead = 0
 	}
 
+	log.Println(phone.Last_known,phone.Conn_list)
+
 	phone.mu.Unlock()
 	return nil
 }
@@ -277,10 +279,6 @@ func process_phone_conn(conn net.TCPConn) {
 			}
 
 			_, ok := phones[user_name];
-			log.Println("ok:", ok)
-			log.Println("random:", phones[user_name].Random == random)
-			log.Printf("two random %v,%v\n", phones[user_name].Random, random)
-			log.Println("equal fold ", strings.EqualFold(phones[user_name].Random, random))
 
 			if ok && (phones[user_name].Random == random) {
 				log.Println(user_name, " phone append a conn", conn.RemoteAddr().String())
