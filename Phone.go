@@ -98,7 +98,7 @@ func (phone *Phone) get_conn() (conn net.TCPConn, err error) {
 	conn0 := phone.Conn_list[0]
 	phone.Conn_list = phone.Conn_list[1:]
 
-	log.Println(phone.User_name, "return conn", conn0.RemoteAddr().String())
+	//log.Println(phone.User_name, "return conn", conn0.RemoteAddr().String())
 
 	phone.mu.Unlock()
 	return conn0, nil
@@ -197,7 +197,7 @@ func start_phones() {
 			log.Println("accept error:", err)
 		}
 		go process_phone_conn(*conn)
-		log.Println("accept a new phone connection")
+		//log.Println("accept a new phone connection")
 	}
 }
 
@@ -274,7 +274,7 @@ func process_phone_conn(conn net.TCPConn) {
 			_, ok := phones[user_name];
 
 			if ok && (phones[user_name].Random == random) {
-				log.Println(user_name, " phone append a conn", conn.RemoteAddr().String())
+				//log.Println(user_name, " phone append a conn", conn.RemoteAddr().String())
 				phones[user_name].append_conn(conn)
 				return
 			} else if !ok {

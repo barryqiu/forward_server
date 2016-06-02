@@ -45,7 +45,6 @@ func main() {
 			log.Println("client accept error:", err)
 		}
 		go processClientReq(*conn)
-		log.Printf("accept a new client connection\n")
 	}
 }
 
