@@ -8,7 +8,6 @@ import (
 	"time"
 	"os"
 	"bufio"
-	"io"
 	"errors"
 )
 
@@ -152,12 +151,10 @@ func read_phones_from_file() {
 		return
 	}
 	defer fl.Close()
-	buff := bufio.NewReader(fl)
-	for {
-		line, err := buff.ReadString('\n')
-		if err != nil || io.EOF == err {
-			break
-		}
+
+	scanner := bufio.NewScanner(fl)
+	for scanner.Scan() {
+		line := scanner.Text()
 		log.Println(line)
 		infos := strings.Split(line, " ")
 		if len(infos) == 2 {
@@ -166,6 +163,10 @@ func read_phones_from_file() {
 			phone.Random = infos[1]
 			phones[infos[0]] = phone
 		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -279,7 +280,7 @@ func process_phone_conn(conn net.TCPConn) {
 			log.Println("ok:", ok)
 			log.Println("random:", phones[user_name].Random == random)
 			log.Printf("two random %v,%v\n", phones[user_name].Random, random)
-			log.Println("equal fold ",strings.EqualFold(phones[user_name].Random, random))
+			log.Println("equal fold ", strings.EqualFold(phones[user_name].Random, random))
 
 			if ok && (phones[user_name].Random == random) {
 				log.Println(user_name, " phone append a conn", conn.RemoteAddr().String())
