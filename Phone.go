@@ -275,11 +275,15 @@ func process_phone_conn(conn net.TCPConn) {
 				return
 			}
 
-			if _, ok := phones[user_name]; ok && phones[user_name].Random == random {
+			_, ok := phones[user_name];
+			log.Println("ok:", ok)
+			log.Println("random:", phones[user_name].Random == random)
+
+			if ok && (phones[user_name].Random == random) {
 				log.Println(user_name, " phone append a conn", conn.RemoteAddr().String())
 				phones[user_name].append_conn(conn)
 				return
-			} else if _, ok := phones[user_name]; !ok {
+			} else if !ok {
 				phone := Phone{}
 				phone.User_name = user_name
 				phone.Random = random
@@ -291,9 +295,9 @@ func process_phone_conn(conn net.TCPConn) {
 				log.Println("stop phone old phone random: ", phones[user_name].Random)
 				conn.Write([]byte("stop"))
 				conn.Close()
+				log.Println("no thing matched")
+				return
 			}
-			log.Println("no thing matched")
-			return
 		}
 
 	}
