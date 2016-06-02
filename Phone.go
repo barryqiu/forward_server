@@ -23,7 +23,6 @@ type Phone struct {
 
 func (phone *Phone) append_conn(conn net.TCPConn) error {
 	phone.mu.Lock()
-	log.Println(phone)
 
 	err := conn.SetKeepAlive(true)
 	if err != nil {
@@ -75,8 +74,6 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 		phone.Overhead = 0
 	}
 
-	log.Println(phone)
-
 	phone.mu.Unlock()
 	return nil
 }
@@ -84,7 +81,6 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 func (phone *Phone) get_conn() (conn net.TCPConn, err error) {
 	exp_time := time.Now().Add(time.Second * 1)
 	phone.mu.Lock()
-	log.Println(phone, phone.User_name, "GET CONN, CONN LIST COUNT ", len(phone.Conn_list))
 	for len(phone.Conn_list) == 0 {
 		time.Sleep(time.Millisecond * 500)
 		if exp_time.Before(time.Now()) {

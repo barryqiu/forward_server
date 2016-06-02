@@ -24,7 +24,7 @@ func processClientReq(conn net.TCPConn) {
 	var header []byte
 	var body []byte
 	for {
-		var buf = make([]byte, 16)
+		var buf = make([]byte, 4096)
 		n, err := conn.Read(buf)
 		if err != nil {
 			log.Println("cleint conn read error:", err)
@@ -61,6 +61,7 @@ func processClientReq(conn net.TCPConn) {
 
 	}
 	uri := req.RequestURI
+	log.Println("URI:", uri)
 	infos := strings.Split(uri, "/")
 	if (len(infos) <= 1) {
 		conn.Write([]byte(errHTML))
@@ -78,7 +79,6 @@ func processClientReq(conn net.TCPConn) {
 	}
 
 	// if uri like /device_name
-	log.Println(uri)
 	if len(infos) == 2 {
 		header = bytes.Replace(header, [] byte(device_name), []byte("/" + device_name), 1)
 	}
@@ -86,7 +86,6 @@ func processClientReq(conn net.TCPConn) {
 	var phone_conn net.TCPConn
 	for {
 		phone_conn, err = phones[device_name].get_conn()
-		log.Println(err)
 		if (net.TCPConn{}) == phone_conn || err != nil{
 			log.Println("no phone conn error:", err)
 			conn.Write([]byte(errHTML))
