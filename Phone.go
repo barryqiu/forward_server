@@ -21,7 +21,7 @@ type Phone struct {
 	Overheat_count int
 }
 
-func (phone Phone) append_conn(conn net.TCPConn) error {
+func (phone *Phone) append_conn(conn net.TCPConn) error {
 	phone.mu.Lock()
 	log.Println(phone)
 
@@ -81,7 +81,7 @@ func (phone Phone) append_conn(conn net.TCPConn) error {
 	return nil
 }
 
-func (phone Phone) get_conn() (conn net.TCPConn, err error) {
+func (phone *Phone) get_conn() (conn net.TCPConn, err error) {
 	exp_time := time.Now().Add(time.Second * 1)
 	phone.mu.Lock()
 	log.Println(phone, phone.User_name, "GET CONN, CONN LIST COUNT ", len(phone.Conn_list))
@@ -107,7 +107,7 @@ func (phone Phone) get_conn() (conn net.TCPConn, err error) {
 	return conn0, nil
 }
 
-func (phone Phone) close_all_conn() error {
+func (phone *Phone) close_all_conn() error {
 	phone.mu.Lock()
 	for len(phone.Conn_list) > 0 {
 		conn0 := phone.Conn_list[0]
@@ -121,7 +121,7 @@ func (phone Phone) close_all_conn() error {
 	return nil
 }
 
-func (phone Phone) init(user_name string, random string, conn net.TCPConn, address net.TCPAddr) error {
+func (phone *Phone) init(user_name string, random string, conn net.TCPConn, address net.TCPAddr) error {
 	phone.User_name = user_name
 	phone.Random = random
 	phone.Last_known = ""
@@ -134,7 +134,7 @@ func (phone Phone) init(user_name string, random string, conn net.TCPConn, addre
 	return nil
 }
 
-func (phone Phone) add_to_file() error {
+func (phone *Phone) add_to_file() error {
 	fl, err := os.OpenFile(db_file_name, os.O_CREATE | os.O_APPEND | os.O_RDWR, 0660)
 	defer fl.Close()
 	if (err != nil) {
