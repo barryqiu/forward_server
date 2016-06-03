@@ -7,14 +7,20 @@ import (
 	"log"
 	"net"
 	"os"
+	"fmt"
+	"time"
+	"path/filepath"
 )
 
-var phones map[string] *Phone
+var phones map[string]*Phone
 var db_file_name string = "phones.txt"
 
 func main() {
 
-	f, err := os.OpenFile("testlogfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+	string_date := current_date_string()
+	os.MkdirAll("log" + string(filepath.Separator) + string_date, 06660)
+	log_file_name := "log" + string(filepath.Separator) + string_date + string(filepath.Separator) + "info.log"
+	f, err := os.OpenFile(log_file_name, os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
 	if err != nil {
 		return
 	}
@@ -56,6 +62,11 @@ func getRequestInfo(str string) (http.Request, error) {
 		return *req, err
 	}
 	return *req, nil
+}
+
+func current_date_string() string {
+	t := time.Now()
+	return fmt.Sprintf("%d%02d%02d", t.Year(), t.Month(), t.Day())
 }
 
 func test() {

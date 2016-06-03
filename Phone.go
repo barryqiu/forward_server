@@ -9,6 +9,8 @@ import (
 	"os"
 	"bufio"
 	"errors"
+	"fmt"
+	"path/filepath"
 )
 
 type Phone struct {
@@ -26,12 +28,14 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 
 	err := conn.SetKeepAlive(true)
 	if err != nil {
-		log.Println("set keep alive error:", err)
+		//log.Println("set keep alive error:", err)
+		phone.log_to_file("set keep alive error:", err)
 	}
 
 	err = conn.SetKeepAlivePeriod(time.Second * 240)
 	if err != nil {
-		log.Println("set keep alive period error:", err)
+		//log.Println("set keep alive period error:", err)
+		phone.log_to_file("set keep alive period error:", err)
 	}
 
 	phone.Conn_list = append(phone.Conn_list, conn)
@@ -40,7 +44,8 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 		conn0 := phone.Conn_list[0]
 		err = conn0.Close()
 		if err != nil {
-			log.Println("close conn error:", err)
+			//log.Println("close conn error:", err)
+			phone.log_to_file("close conn error:", err)
 		}
 		phone.Conn_list = phone.Conn_list[1:]
 
@@ -60,13 +65,16 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 	ip := strings.Split(address.String(), ":")[0]
 
 	if phone.Last_known != ip {
-		log.Println("not last known ip")
-		log.Println("Last known IP:" + phone.Last_known + ", new:" + ip)
+		//log.Println("not last known ip")
+		//log.Println("Last known IP:" + phone.Last_known + ", new:" + ip)
+		phone.log_to_file("not last known ip")
+		phone.log_to_file("Last known IP:" + phone.Last_known + ", new:" + ip)
 		for len(phone.Conn_list) > 1 {
 			conn0 := phone.Conn_list[0]
 			err = conn0.Close()
 			if err != nil {
-				log.Println("close conn error:", err)
+				//log.Println("close conn error:", err)
+				phone.log_to_file("close conn error:", err)
 			}
 			phone.Conn_list = phone.Conn_list[1:]
 		}
@@ -74,6 +82,8 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 		phone.Overheat_count = 0
 		phone.Overhead = 0
 	}
+
+	phone.log_to_file("append a conn", conn.RemoteAddr().String())
 
 	phone.mu.Unlock()
 	return nil
@@ -90,7 +100,8 @@ func (phone *Phone) get_conn() (conn net.TCPConn, err error) {
 	}
 
 	if len(phone.Conn_list) == 0 {
-		log.Println("Got signal , bu no connection " + phone.User_name)
+		//log.Println("Got signal , bu no connection " + phone.User_name)
+		phone.log_to_file("Got signal , bu no connection " + phone.User_name)
 		phone.mu.Unlock()
 		return net.TCPConn{}, errors.New("no connect")
 	}
@@ -98,7 +109,8 @@ func (phone *Phone) get_conn() (conn net.TCPConn, err error) {
 	conn0 := phone.Conn_list[0]
 	phone.Conn_list = phone.Conn_list[1:]
 
-	log.Println(phone.User_name, "return conn", conn0.RemoteAddr().String())
+	//log.Println(phone.User_name, "return conn", conn0.RemoteAddr().String())
+	phone.log_to_file(phone.User_name, "return conn", conn0.RemoteAddr().String())
 
 	phone.mu.Unlock()
 	return conn0, nil
@@ -110,7 +122,8 @@ func (phone *Phone) close_all_conn() error {
 		conn0 := phone.Conn_list[0]
 		err := conn0.Close()
 		if err != nil {
-			log.Println("close conn error:", err)
+			//log.Println("close conn error:", err)
+			phone.log_to_file("close conn error:", err)
 		}
 		phone.Conn_list = phone.Conn_list[1:]
 	}
@@ -135,10 +148,25 @@ func (phone *Phone) add_to_file() error {
 	fl, err := os.OpenFile(db_file_name, os.O_CREATE | os.O_APPEND | os.O_RDWR, 0660)
 	defer fl.Close()
 	if (err != nil) {
-		log.Println("open file error", err)
+		//log.Println("open file error", err)
+		phone.log_to_file("open file error", err)
 		return err
 	}
 	fl.WriteString(phone.User_name + " " + phone.Random + "\n")
+	return nil
+}
+
+func (phone *Phone) log_to_file(v ...interface{}) error {
+	string_date := current_date_string()
+	os.MkdirAll("log" + string(filepath.Separator) + string_date, 06660)
+	log_file_name := "log" + string(filepath.Separator) + string_date + string(filepath.Separator) + phone.User_name + ".log"
+	fl, err := os.OpenFile(log_file_name, os.O_CREATE | os.O_APPEND | os.O_RDWR, 0660)
+	defer fl.Close()
+	if (err != nil) {
+		log.Println("open file error", err)
+		return err
+	}
+	fl.WriteString(fmt.Sprintln(v...))
 	return nil
 }
 
@@ -274,7 +302,7 @@ func process_phone_conn(conn net.TCPConn) {
 			_, ok := phones[user_name];
 
 			if ok && (phones[user_name].Random == random) {
-				log.Println(user_name, " phone append a conn", conn.RemoteAddr().String())
+				//log.Println(user_name, " phone append a conn", conn.RemoteAddr().String())
 				phones[user_name].append_conn(conn)
 				return
 			} else if !ok {
