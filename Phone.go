@@ -158,6 +158,7 @@ func (phone *Phone) add_to_file() error {
 
 func (phone *Phone) log_to_file(v ...interface{}) error {
 	string_date := current_date_string()
+	string_time := current_time_string()
 	os.MkdirAll("log" + string(filepath.Separator) + string_date, 06660)
 	log_file_name := "log" + string(filepath.Separator) + string_date + string(filepath.Separator) + phone.User_name + ".log"
 	fl, err := os.OpenFile(log_file_name, os.O_CREATE | os.O_APPEND | os.O_RDWR, 0660)
@@ -166,7 +167,7 @@ func (phone *Phone) log_to_file(v ...interface{}) error {
 		log.Println("open file error", err)
 		return err
 	}
-	fl.WriteString(fmt.Sprintln(v...))
+	fl.WriteString("[" + string_time + "]" +fmt.Sprintln(v...))
 	return nil
 }
 

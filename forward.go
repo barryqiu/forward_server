@@ -68,6 +68,10 @@ func current_date_string() string {
 	t := time.Now()
 	return fmt.Sprintf("%d%02d%02d", t.Year(), t.Month(), t.Day())
 }
+func current_time_string() string {
+	t := time.Now()
+	return fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+}
 
 func test() {
 	return
