@@ -32,7 +32,7 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 		phone.log_to_file("set keep alive error:", err)
 	}
 
-	err = conn.SetKeepAlivePeriod(time.Second * 240)
+	err = conn.SetKeepAlivePeriod(time.Second * 960)
 	if err != nil {
 		//log.Println("set keep alive period error:", err)
 		phone.log_to_file("set keep alive period error:", err)
