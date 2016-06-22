@@ -59,7 +59,7 @@ func getRequestInfo(str string) (http.Request, error) {
 	req, err := http.ReadRequest(reader)
 	if err != nil {
 		log.Println("parse http request error:", err)
-		return *req, err
+		return http.Request{}, err
 	}
 	return *req, nil
 }
