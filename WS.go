@@ -90,7 +90,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		}
 		log.Println(uri, "receive", data_len)
 		phone_conn.Close()
-		time.Sleep(time.Millisecond * 200)
+		time.Sleep(time.Millisecond * 80)
 	}
 }
 
