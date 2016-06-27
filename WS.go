@@ -15,7 +15,18 @@ var address = flag.String("addr", ":8001", "http service address")
 
 var upGrader = websocket.Upgrader{} // use default options
 
-var sendRequestContent = `GET /screenshot.jpg HTTP/1.1\r\nProxy-Connection: keep-alive\r\nUser-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.84 Safari/537.36\r\nAccept: image/webp,image/*,*/*;q=0.8\r\nAccept-Encoding: gzip, deflate, sdch\r\nAccept-Language: zh-CN,zh;q=0.8,en;q=0.6\r\nCookie: leftWidgetList=%5B%5D; time=1467032897477571; lang=zh\r\n\r\n`
+var sendRequestContent = `GET /screenshot.jpg?vlfnnn14670333662470 HTTP/1.1
+Host: 101.201.37.72:8000
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.84 Safari/537.36
+Accept: image/webp,image/*,*/*;q=0.8
+Referer: http://101.201.37.72:8000/IYIACJY5CN/phone.html
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
+Cookie: leftWidgetList=%5B%5D; time=1467033365808160; lang=zh
+Cache-Control: max-age=259200
+Connection: keep-alive
+
+`
 
 func get_screen(w http.ResponseWriter, req *http.Request) {
 	req.Header["Origin"] = nil
