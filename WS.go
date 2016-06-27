@@ -53,7 +53,6 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 	for {
 		var phone_conn net.TCPConn
 		for {
-			log.Printf("%v", phones[device_name])
 			phone_conn, err = phones[device_name].get_conn()
 			if (net.TCPConn{}) == phone_conn || err != nil {
 				log.Println("no phone conn error:", err)
@@ -73,10 +72,8 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 
 		data_len := 0
 		for {
-			log.Println("start receive data")
 			var buf = make([]byte, 4096)
 			n, err := phone_conn.Read(buf)
-			log.Println(uri, "receive", n)
 
 			if n == 0 || err == io.EOF {
 				break

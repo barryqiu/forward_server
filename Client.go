@@ -100,7 +100,6 @@ func processClientReq(conn net.TCPConn) {
 			data = []byte("GET /test HTTP/1.1\r\nHOST: anything\r\n\r\n")
 			log.Println(device_name, "test conn")
 		}
-		log.Println(string(data))
 		_, err = phone_conn.Write(data)
 		//log.Println("new request data", string(data))
 		if err != nil {
