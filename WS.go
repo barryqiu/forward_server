@@ -62,8 +62,10 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 
 		data_len := 0
 		for {
+			log.Println("start receive data")
 			var buf = make([]byte, 4096)
 			n, err := phone_conn.Read(buf)
+			log.Println(uri, "receive", n)
 
 			if n == 0 || err == io.EOF {
 				break
@@ -76,7 +78,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			}
 			conn.WriteMessage(websocket.BinaryMessage, buf[:n])
 			data_len += n
-			log.Println(uri, "receive", data_len)
+
 		}
 		log.Println(uri, "receive", data_len)
 		phone_conn.Close()
