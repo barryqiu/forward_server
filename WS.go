@@ -5,10 +5,10 @@ import (
 	"github.com/gorilla/websocket"
 	"net/http"
 	"log"
-	"strings"
-	"net"
-	"io"
-	"time"
+	//"strings"
+	//"net"
+	//"io"
+	//"time"
 )
 
 var address = flag.String("addr", ":8001", "http service address")
