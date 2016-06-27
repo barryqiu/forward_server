@@ -25,7 +25,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer conn.Close()
-	conn.WriteMessage(websocket.TextMessage, "hello")
+	conn.WriteMessage(websocket.TextMessage, []byte("hello"))
 	uri := req.RequestURI
 	log.Println("URI:", uri)
 	/*
