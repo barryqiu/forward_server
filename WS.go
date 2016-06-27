@@ -50,7 +50,14 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 				conn.Close()
 				return
 			}
-			phone_conn.Write([]byte(sendRequestContent))
+
+			_, err = phone_conn.Write([]byte(sendRequestContent))
+			if err != nil {
+				log.Println("send error", err)
+			} else {
+				break
+			}
+			phone_conn.Close()
 		}
 
 		data_len := 0
@@ -72,7 +79,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		}
 		log.Println(uri, "receive", data_len)
 		phone_conn.Close()
-		time.Sleep(time.Millisecond * 500)
+		time.Sleep(time.Millisecond * 50)
 	}
 }
 
