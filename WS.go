@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var address = flag.String("addr", "localhost:8001", "http service address")
+var address = flag.String("addr", ":8001", "http service address")
 
 var upGrader = websocket.Upgrader{} // use default options
 
