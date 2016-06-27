@@ -315,7 +315,7 @@ func process_phone_conn(conn net.TCPConn) {
 				phones[user_name].append_conn(conn)
 				log.Println("new phone ", user_name)
 			} else {
-				log.Println("stop phone old phone random: ", phones[user_name].Random)
+				log.Println(user_name, "stop phone old phone random: ", phones[user_name].Random)
 				//conn.Write([]byte("stop"))
 				conn.Close()
 				log.Println("no thing matched")
