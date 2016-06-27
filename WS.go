@@ -5,10 +5,10 @@ import (
 	"github.com/gorilla/websocket"
 	"net/http"
 	"log"
-	//"strings"
-	//"net"
-	//"io"
-	//"time"
+	"strings"
+	"net"
+	"io"
+	"time"
 )
 
 var address = flag.String("addr", ":8001", "http service address")
@@ -25,10 +25,8 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer conn.Close()
-	conn.WriteMessage(websocket.TextMessage, []byte("hello"))
 	uri := req.RequestURI
 	log.Println("URI:", uri)
-	/*
 	infos := strings.Split(uri, "/")
 	if (len(infos) <= 1) {
 		log.Println("wrong url")
@@ -47,6 +45,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			phone_conn, err = phones[device_name].get_conn()
 			if (net.TCPConn{}) == phone_conn || err != nil {
 				log.Println("no phone conn error:", err)
+				conn.WriteMessage(websocket.TextMessage, []byte("no phone conn error"))
 				conn.Close()
 				return
 			}
@@ -64,6 +63,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 
 			if err != nil {
 				log.Println("conn read error:", err)
+				conn.WriteMessage(websocket.TextMessage, []byte("no data error"))
 				return
 			}
 			conn.WriteMessage(websocket.BinaryMessage,buf[:n])
@@ -72,7 +72,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		log.Println(uri, "receive", data_len)
 		phone_conn.Close()
 	}
-	time.Sleep(time.Millisecond * 10)*/
+	time.Sleep(time.Millisecond * 10)
 }
 
 func start_ws() {
