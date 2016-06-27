@@ -25,8 +25,10 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer conn.Close()
+	conn.WriteMessage(websocket.TextMessage, "hello")
 	uri := req.RequestURI
 	log.Println("URI:", uri)
+	/*
 	infos := strings.Split(uri, "/")
 	if (len(infos) <= 1) {
 		log.Println("wrong url")
@@ -70,7 +72,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		log.Println(uri, "receive", data_len)
 		phone_conn.Close()
 	}
-	time.Sleep(time.Millisecond * 10)
+	time.Sleep(time.Millisecond * 10)*/
 }
 
 func start_ws() {
