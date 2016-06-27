@@ -72,8 +72,8 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		}
 		log.Println(uri, "receive", data_len)
 		phone_conn.Close()
+		time.Sleep(time.Millisecond * 500)
 	}
-	time.Sleep(time.Second * 5)
 }
 
 func start_ws() {
