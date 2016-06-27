@@ -11,17 +11,11 @@ import (
 	"time"
 )
 
-const (
-	// Time allowed to write a message to the peer.
-	writeWait = 10 * time.Second
-)
+var address = flag.String("addr", ":8001", "http service address")
 
-var (
-	address = flag.String("addr", ":8001", "http service address")
+var upGrader = websocket.Upgrader{} // use default options
 
-	upGrader = websocket.Upgrader{} // use default options
-
-	sendRequestContent = `GET /screenshot.jpg?vlfnnn14670333662470 HTTP/1.1
+var sendRequestContent = `GET /screenshot.jpg?vlfnnn14670333662470 HTTP/1.1
 Host: 101.201.37.72:8000
 User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.84 Safari/537.36
 Accept: image/webp,image/*,*/*;q=0.8
@@ -33,7 +27,6 @@ Cache-Control: max-age=259200
 Connection: keep-alive
 
 `
-)
 
 func get_screen(w http.ResponseWriter, req *http.Request) {
 	req.Header["Origin"] = nil
@@ -63,6 +56,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			phone_conn, err = phones[device_name].get_conn()
 			if (net.TCPConn{}) == phone_conn || err != nil {
 				log.Println("no phone conn error:", err)
+				conn.WriteMessage(websocket.TextMessage, []byte("no phone conn error"))
 				conn.Close()
 				return
 			}
@@ -87,23 +81,18 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 
 			if err != nil {
 				log.Println("conn read error:", err)
+				conn.WriteMessage(websocket.TextMessage, []byte("no data error"))
 				return
 			}
-			conn.SetWriteDeadline(time.Now().Add(writeWait))
-			w, err := conn.NextWriter(websocket.BinaryMessage)
-			if err != nil {
-				return
-			}
-			w.Write(buf[:n])
-
+			conn.WriteMessage(websocket.BinaryMessage, buf[:n])
 			data_len += n
-			if err := w.Close(); err != nil {
-				return
-			}
 
 		}
 		log.Println(uri, "receive", data_len)
 		phone_conn.Close()
+		if err := conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+			return
+		}
 		time.Sleep(time.Millisecond * 80)
 	}
 }
