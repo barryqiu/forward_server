@@ -76,6 +76,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			}
 			conn.WriteMessage(websocket.BinaryMessage, buf[:n])
 			data_len += n
+			log.Println(uri, "receive", data_len)
 		}
 		log.Println(uri, "receive", data_len)
 		phone_conn.Close()
