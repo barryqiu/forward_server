@@ -57,8 +57,6 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	conn.SetWriteDeadline(time.Now().Add(writeWait))
-
 	for {
 		var phone_conn net.TCPConn
 		for {
@@ -91,6 +89,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 				log.Println("conn read error:", err)
 				return
 			}
+			conn.SetWriteDeadline(time.Now().Add(writeWait))
 			w, err := conn.NextWriter(websocket.BinaryMessage)
 			if err != nil {
 				return
