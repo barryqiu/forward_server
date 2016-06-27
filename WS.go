@@ -15,7 +15,7 @@ var address = flag.String("addr", ":8001", "http service address")
 
 var upGrader = websocket.Upgrader{} // use default options
 
-var sendRequestContent= `GET /screenshot.jpg HTTP/1.1\r\nConnection: keep-alive\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate, sdch\r\nAccept-Language: zh-CN,zh;q=0.8,en;q=0.6\r\n\r\n`
+var sendRequestContent = `GET /screenshot.jpg HTTP/1.1\r\nConnection: keep-alive\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate, sdch\r\nAccept-Language: zh-CN,zh;q=0.8,en;q=0.6\r\n\r\n`
 
 func get_screen(w http.ResponseWriter, req *http.Request) {
 	req.Header["Origin"] = nil
@@ -42,6 +42,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 	for {
 		var phone_conn net.TCPConn
 		for {
+			log.Printf("%v", phones[device_name])
 			phone_conn, err = phones[device_name].get_conn()
 			if (net.TCPConn{}) == phone_conn || err != nil {
 				log.Println("no phone conn error:", err)
@@ -66,7 +67,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 				conn.WriteMessage(websocket.TextMessage, []byte("no data error"))
 				return
 			}
-			conn.WriteMessage(websocket.BinaryMessage,buf[:n])
+			conn.WriteMessage(websocket.BinaryMessage, buf[:n])
 			data_len += n
 		}
 		log.Println(uri, "receive", data_len)
