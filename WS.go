@@ -10,7 +10,6 @@ import (
 	"io"
 	"time"
 	"bytes"
-	"fmt"
 )
 
 var address = flag.String("addr", ":8001", "http service address")
@@ -88,7 +87,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			}
 			start_index := 0
 			header_index := bytes.Index(buf[:n], []byte("\r\n\r\n"))
-			fmt.Println("header index", header_index)
+			log.Println("header index:", header_index)
 			if header_index > 0 {
 				start_index = header_index + 4
 			}
