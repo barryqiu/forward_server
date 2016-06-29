@@ -87,10 +87,10 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			}
 			start_index := 0
 			header_index := bytes.Index(buf[:n], []byte("\r\n\r\n"))
-			log.Println("header index:", header_index)
 			if header_index > 0 {
 				start_index = header_index + 4
 			}
+			log.Print(string(buf[:start_index]))
 			conn.WriteMessage(websocket.BinaryMessage, buf[start_index:n])
 			data_len += n
 
