@@ -72,6 +72,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		}
 
 		data_len := 0
+		var data [] byte
 		for {
 			var buf = make([]byte, 4096)
 			n, err := phone_conn.Read(buf)
@@ -90,12 +91,13 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			if header_index > 0 {
 				start_index = header_index + 4
 			}
-			log.Print(string(buf[:start_index]))
-			conn.WriteMessage(websocket.BinaryMessage, buf[start_index:n])
+			append(data, buf[start_index:n]...)
+			//conn.WriteMessage(websocket.BinaryMessage, buf[start_index:n])
 			data_len += n
 
 		}
-		log.Println(uri, "receive", data_len)
+		conn.WriteMessage(websocket.BinaryMessage, data)
+		log.Println(uri, "send", len(data))
 		phone_conn.Close()
 		if err := conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
 			return
