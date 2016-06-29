@@ -9,6 +9,7 @@ import (
 	"net"
 	"io"
 	"time"
+	"bytes"
 )
 
 var address = flag.String("addr", ":8001", "http service address")
@@ -71,6 +72,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		}
 
 		data_len := 0
+		i := 0
 		for {
 			var buf = make([]byte, 4096)
 			n, err := phone_conn.Read(buf)
@@ -84,7 +86,15 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 				conn.WriteMessage(websocket.TextMessage, []byte("no data error"))
 				return
 			}
-			conn.WriteMessage(websocket.BinaryMessage, buf[:n])
+			start_index := 0
+			if i == 0 {
+				header_index := bytes.Index(buf[:n], []byte("\r\n\r\n"))
+				if header_index > 0 {
+					start_index = header_index + 4
+				}
+			}
+			i++
+			conn.WriteMessage(websocket.BinaryMessage, buf[start_index:n])
 			data_len += n
 
 		}
