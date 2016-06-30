@@ -83,7 +83,7 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 		phone.Overhead = 0
 	}
 
-	phone.log_to_file("append a conn", conn.RemoteAddr().String())
+	//phone.log_to_file("append a conn", conn.RemoteAddr().String())
 
 	phone.mu.Unlock()
 	return nil
@@ -110,7 +110,7 @@ func (phone *Phone) get_conn() (conn net.TCPConn, err error) {
 	phone.Conn_list = phone.Conn_list[1:]
 
 	//log.Println(phone.User_name, "return conn", conn0.RemoteAddr().String())
-	phone.log_to_file(phone.User_name, "return conn", conn0.RemoteAddr().String())
+	//phone.log_to_file(phone.User_name, "return conn", conn0.RemoteAddr().String())
 
 	phone.mu.Unlock()
 	return conn0, nil
