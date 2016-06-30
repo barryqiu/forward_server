@@ -94,11 +94,8 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 
 		}
 		conn.WriteMessage(websocket.BinaryMessage, data)
-		log.Println(uri, "send", len(data))
+		//log.Println(uri, "send", len(data))
 		phone_conn.Close()
-		if err := conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-			return
-		}
 		//time.Sleep(time.Millisecond * 20)
 	}
 }
