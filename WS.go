@@ -10,13 +10,22 @@ import (
 	"io"
 	//"time"
 	"bytes"
+	"time"
 )
 
 var address = flag.String("addr", ":8001", "http service address")
 
 var upGrader = websocket.Upgrader{} // use default options
 
-var sendRequestContent = `GET /screenshot.jpg?vlfnnn14670333662470 HTTP/1.1
+var sendVRequestContent = `GET /screenshot.jpg?vlfnnn14670333662470 HTTP/1.1
+Accept: image/webp,image/*,*/*;q=0.8
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
+Cache-Control: max-age=259200
+Connection: keep-alive
+
+`
+var sendHRequestContent = `GET /screenshot.jpg?hlfnnn14670333662470 HTTP/1.1
 Accept: image/webp,image/*,*/*;q=0.8
 Accept-Encoding: gzip, deflate, sdch
 Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
@@ -33,6 +42,17 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	conn.WriteMessage(websocket.TextMessage, []byte(`{"action":"init","width":960,"height":540}`))
+
+	device_type := "v"
+	conn.SetReadDeadline(time.Now().Add(10 * time.Second))
+	for {
+		t, m, err := conn.ReadMessage()
+		if (t == websocket.TextMessage && err == nil) {
+			device_type = string(m)
+			break
+		}
+	}
+
 	defer conn.Close()
 	uri := req.RequestURI
 	log.Println("URI:", uri)
@@ -58,12 +78,20 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 				conn.Close()
 				return
 			}
-
-			_, err = phone_conn.Write([]byte(sendRequestContent))
-			if err != nil {
-				log.Println("send error", err)
+			if device_type == "h" {
+				_, err = phone_conn.Write([]byte(sendHRequestContent))
+				if err != nil {
+					log.Println("send error", err)
+				} else {
+					break
+				}
 			} else {
-				break
+				_, err = phone_conn.Write([]byte(sendVRequestContent))
+				if err != nil {
+					log.Println("send error", err)
+				} else {
+					break
+				}
 			}
 			phone_conn.Close()
 		}
