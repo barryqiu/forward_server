@@ -36,6 +36,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		log.Print("upgrade:", err)
 		return
 	}
+	conn.WriteMessage(websocket.TextMessage, []byte(`{"action":"init","width":960,"height":540}`))
 	defer conn.Close()
 	uri := req.RequestURI
 	log.Println("URI:", uri)
@@ -102,7 +103,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		if err := conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
 			return
 		}
-		time.Sleep(time.Millisecond * 80)
+		time.Sleep(time.Millisecond * 10)
 	}
 }
 
