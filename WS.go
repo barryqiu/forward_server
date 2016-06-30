@@ -103,7 +103,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		if err := conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
 			return
 		}
-		time.Sleep(time.Millisecond * 10)
+		time.Sleep(time.Millisecond * 50)
 	}
 }
 
