@@ -233,7 +233,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			clientConn.send <- data
 			log.Println(uri, "send", len(data))
 			phone_conn.Close()
-			time.Sleep(time.Millisecond * 50)
+			time.Sleep(time.Millisecond * 5000)
 		}
 
 	}
