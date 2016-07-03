@@ -91,6 +91,7 @@ func (c *ClientConn) writePump() {
 	for {
 		select {
 		case message, ok := <-c.send:
+			var data []byte
 			if !ok {
 				// The hub closed the channel.
 				c.write(websocket.CloseMessage, []byte{})
@@ -102,13 +103,15 @@ func (c *ClientConn) writePump() {
 			if err != nil {
 				return
 			}
-			w.Write(message)
+			data = append(data, message...)
 
 		// Add queued chat messages to the current websocket message.
 			n := len(c.send)
 			for i := 0; i < n; i++ {
-				w.Write(<-c.send)
+				data = append(data, message...)
 			}
+
+			w.Write(data)
 
 			if err := w.Close(); err != nil {
 				return
