@@ -98,6 +98,8 @@ func (c *ClientConn) writePump() {
 				return
 			}
 
+			log.Println("send message len ", len(message))
+
 			c.ws.SetWriteDeadline(time.Now().Add(writeWait))
 			w, err := c.ws.NextWriter(websocket.BinaryMessage)
 			if err != nil {
@@ -109,7 +111,7 @@ func (c *ClientConn) writePump() {
 			n := len(c.send)
 			log.Println("send len ", n)
 			for i := 0; i < n; i++ {
-				data = append(data, message...)
+				data = append(data, <-c.send...)
 			}
 
 			w.Write(data)
