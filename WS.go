@@ -91,30 +91,19 @@ func (c *ClientConn) writePump() {
 	for {
 		select {
 		case message, ok := <-c.send:
-			var data []byte
 			if !ok {
 				// The hub closed the channel.
 				c.write(websocket.CloseMessage, []byte{})
 				return
 			}
 
-			log.Println("send message len ", len(message))
-
 			c.ws.SetWriteDeadline(time.Now().Add(writeWait))
 			w, err := c.ws.NextWriter(websocket.BinaryMessage)
 			if err != nil {
 				return
 			}
-			data = append(data, message...)
 
-		// Add queued chat messages to the current websocket message.
-			n := len(c.send)
-			log.Println("send len ", n)
-			for i := 0; i < n; i++ {
-				data = append(data, <-c.send...)
-			}
-
-			w.Write(data)
+			w.Write(message)
 
 			if err := w.Close(); err != nil {
 				return
@@ -235,7 +224,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			clientConn.send <- data
 			log.Println(uri, "send", len(data))
 			phone_conn.Close()
-			time.Sleep(time.Millisecond * 5000)
+			time.Sleep(time.Millisecond * 50)
 		}
 
 	}
