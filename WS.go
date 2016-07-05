@@ -54,8 +54,8 @@ const (
 )
 
 type ClientParam struct {
-	device_type string `json:"type"`
-	token       string `json:"token"`
+	DeviceType string `json:"type"`
+	Token       string `json:"token"`
 }
 
 func judge_auth(token string, deviceName string) error {
@@ -186,10 +186,9 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			}
 			break
 		}
-		json.Unmarshal(message, &clientParam)
-		log.Println(string(message))
+		err = json.Unmarshal(message, &clientParam)
 		log.Printf("json : %v\n", clientParam)
-		device_type = string(clientParam.device_type)
+		device_type = string(clientParam.DeviceType)
 		break
 	}
 
