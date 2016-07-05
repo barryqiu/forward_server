@@ -180,12 +180,14 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 	var clientParam ClientParam
 	for {
 		err := conn.ReadJSON(&clientParam)
+		_, message, err := conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 				log.Printf("error: %v", err)
 			}
 			break
 		}
+		json.Unmarshal(message, &clientParam)
 		log.Printf("json : %v\n", clientParam)
 		device_type = string(clientParam.device_type)
 		break
