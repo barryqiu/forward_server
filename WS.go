@@ -14,7 +14,7 @@ import (
 	"io/ioutil"
 	"fmt"
 	"encoding/base64"
-	"os"
+	//"os"
 	"encoding/json"
 	"errors"
 )
@@ -200,12 +200,12 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 	}
 	device_name := infos[1]
 
-	err = judge_auth(clientParam.token,device_name)
-	if err != nil{
-		log.Println(device_name + " wrong auth")
-		conn.Close()
-		return
-	}
+	//err = judge_auth(clientParam.token,device_name)
+	//if err != nil{
+	//	log.Println(device_name + " wrong auth")
+	//	conn.Close()
+	//	return
+	//}
 
 	if _, ok := phones[device_name]; !ok {
 		log.Println(device_name + " not exist")
@@ -231,8 +231,8 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 				phone_conn, err = phones[device_name].get_conn()
 				if (net.TCPConn{}) == phone_conn || err != nil {
 					log.Println("no phone conn error:", err)
-					//conn.WriteMessage(websocket.TextMessage, []byte("no phone conn error"))
-					//conn.Close()
+					conn.WriteMessage(websocket.TextMessage, []byte("no phone conn error"))
+					conn.Close()
 					return
 				}
 				if device_type == "h" {
