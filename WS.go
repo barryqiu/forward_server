@@ -179,7 +179,6 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 	conn.SetReadDeadline(time.Now().Add(10 * time.Second))
 	var clientParam ClientParam
 	for {
-		err := conn.ReadJSON(&clientParam)
 		_, message, err := conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
