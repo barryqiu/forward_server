@@ -186,6 +186,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			}
 			break
 		}
+		log.Printf("json : %v\n", clientParam)
 		device_type = string(clientParam.device_type)
 		break
 	}
