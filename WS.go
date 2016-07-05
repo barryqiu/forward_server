@@ -11,6 +11,12 @@ import (
 	//"time"
 	"bytes"
 	"time"
+	"io/ioutil"
+	"fmt"
+	"encoding/base64"
+	"os"
+	"encoding/json"
+	"errors"
 )
 
 var (
@@ -46,6 +52,49 @@ const (
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
 )
+
+type ClientParam struct {
+	device_type string `json:"type"`
+	token       string `json:"token"`
+}
+
+func judge_auth(token string, deviceName string) error {
+	//os.Setenv("HTTP_PROXY", "http://proxy.tencent.com:8080")
+	client := &http.Client{}
+
+	req, err := http.NewRequest("GET", "http://yunphone.shinegame.cn/api/1.1/device/user", nil)
+	if err != nil {
+		errors.New("http error")
+	}
+
+	base64Token := base64.StdEncoding.EncodeToString([]byte(token + ":"))
+
+	req.Header.Set("Authorization", fmt.Sprintf("Basic %s", base64Token))
+	resp, err := client.Do(req)
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		errors.New("http error")
+	}
+
+	var f interface{}
+	err = json.Unmarshal(body, &f)
+
+	data := f.(map[string]interface{})
+	content := data["content"]
+	devices := content.([]interface{})
+	for _, device := range devices {
+		device_map := device.(map[string]interface{})
+		device_name := device_map["device_name"].(string)
+		if device_name == deviceName {
+			return nil
+		}
+	}
+
+	return errors.New("no auth")
+}
 
 type ClientConn struct {
 	ws   *websocket.Conn
@@ -128,15 +177,16 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 
 	device_type := "v"
 	conn.SetReadDeadline(time.Now().Add(10 * time.Second))
+	var clientParam ClientParam
 	for {
-		_, message, err := conn.ReadMessage()
+		err := conn.ReadJSON(&clientParam)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 				log.Printf("error: %v", err)
 			}
 			break
 		}
-		device_type = string(message)
+		device_type = string(clientParam.device_type)
 		break
 	}
 
@@ -149,6 +199,13 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	device_name := infos[1]
+
+	err = judge_auth(clientParam.token,device_name)
+	if err != nil{
+		log.Println(device_name + " wrong auth")
+		conn.Close()
+		return
+	}
 
 	if _, ok := phones[device_name]; !ok {
 		log.Println(device_name + " not exist")
