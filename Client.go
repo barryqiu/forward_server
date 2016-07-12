@@ -14,7 +14,7 @@ import (
 // 接受云端设备请求的部分使用Go的socket编程处理,同样使用全局变量来操作云端设备对象,实现添加链接等操作
 
 // 测试链接是否可用：/{device_name}/testconn
-var header = `HTTP/1.1 200 OK
+var headerHtml = `HTTP/1.1 200 OK
 Cache-Control: no-store, no-cache, must-revalidate
 Cache-Control: post-check=0, pre-check=0
 Pragma: no-cache
@@ -36,7 +36,7 @@ func sendPhoneHtml(conn net.TCPConn) {
 
 	defer file.Close()
 	buf := make([]byte, 4096)
-	conn.Write([]byte(header))
+	conn.Write([]byte(headerHtml))
 	for {
 		n, _ := file.Read(buf)
 		if 0 == n {
@@ -167,10 +167,10 @@ func processClientReq(conn net.TCPConn) {
 
 		if isTest == true {
 			 if string(buf[:n]) == "Webkey"{
-				 conn.Write(header)
+				 conn.Write([]byte(headerHtml))
 				 conn.Write([]byte("Phone is OK"))
 			 }else {
-				 conn.Write(header)
+				 conn.Write([]byte(headerHtml))
 				 conn.Write([]byte("Phone is off line"))
 			 }
 			conn.Close()
