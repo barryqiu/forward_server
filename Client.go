@@ -118,7 +118,7 @@ func processClientReq(conn net.TCPConn) {
 
 	// if uri like /device_name
 	if len(infos) == 2 {
-		header = bytes.Replace(header, [] byte(device_name), []byte("/" + device_name), 1)
+		header = bytes.Replace(header, [] byte(device_name), []byte(device_name + "/"), 1)
 	}
 
 	var phone_conn net.TCPConn
