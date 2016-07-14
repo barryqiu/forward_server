@@ -166,6 +166,8 @@ func processClientReq(conn net.TCPConn) {
 			return
 		}
 
+		data_len += n
+
 		if isTest == true {
 			if string(buf[:n]) == "Webkey" {
 				renderHtmlString(conn, "Phone is OK")
@@ -174,9 +176,7 @@ func processClientReq(conn net.TCPConn) {
 			}
 			break
 		}
-
 		conn.Write(buf[:n])
-		data_len += n
 	}
 	conn.Close()
 	log.Println(uri, "receive", data_len)
