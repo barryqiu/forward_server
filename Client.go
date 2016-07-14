@@ -109,7 +109,7 @@ func processClientReq(conn net.TCPConn) {
 		return
 	}
 
-	if len(infos) > 2 && infos[2] == "phone.html" {
+	if len(infos) > 2 && strings.HasPrefix(infos[2] ,"phone.html"){
 		renderHtmlFileAndClose(conn, "phone.html")
 		log.Println(device_name + " phone.html")
 		return
