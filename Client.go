@@ -109,11 +109,11 @@ func processClientReq(conn net.TCPConn) {
 		return
 	}
 
-	//if len(infos) > 2 && infos[2] == "phone.html" {
-	//	renderHtmlFileAndClose(conn, "phone.html")
-	//	log.Println(device_name + " phone.html")
-	//	return
-	//}
+	if len(infos) > 2 && infos[2] == "phone.html" {
+		renderHtmlFileAndClose(conn, "phone.html")
+		log.Println(device_name + " phone.html")
+		return
+	}
 
 
 	// if uri like /device_name
