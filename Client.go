@@ -171,8 +171,10 @@ func processClientReq(conn net.TCPConn) {
 		if isTest == true {
 			if string(buf[:n]) == "Webkey" {
 				renderHtmlString(conn, "Phone is OK")
+				log.Println(uri, "test OK")
 			} else {
 				renderHtmlString(conn, "Phone is off line")
+				log.Println(uri, "test off line")
 			}
 			break
 		}
