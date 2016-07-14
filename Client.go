@@ -109,7 +109,7 @@ func processClientReq(conn net.TCPConn) {
 		return
 	}
 
-	if len(infos) > 2 && strings.HasPrefix(infos[2] ,"phone.html"){
+	if len(infos) > 2 && strings.HasPrefix(infos[2], "phone.html") {
 		renderHtmlFileAndClose(conn, "phone.html")
 		log.Println(device_name + " phone.html")
 		return
@@ -179,6 +179,10 @@ func processClientReq(conn net.TCPConn) {
 			break
 		}
 		conn.Write(buf[:n])
+	}
+	if isTest == true && data_len == 0 {
+		renderHtmlString(conn, "Phone is off line")
+		log.Println(uri, "test off line")
 	}
 	conn.Close()
 	log.Println(uri, "receive", data_len)
