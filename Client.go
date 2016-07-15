@@ -87,6 +87,7 @@ func processTestConn(device_name string, conn net.TCPConn) {
 			if err == io.EOF {
 				phone_conn.Close()
 				log.Println(device_name, "test conn return 0")
+				break
 				if i == 2 {
 					renderHtmlString(conn, "Phone is off line")
 					return
