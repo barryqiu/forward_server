@@ -7,7 +7,6 @@ import (
 	"strings"
 	"io"
 	"os"
-	"time"
 )
 // 策略:
 // 使用一个全局的slice数组存储所有的Phone
@@ -79,40 +78,36 @@ func processTestConn(device_name string, conn net.TCPConn) {
 			phone_conn.Close()
 		}
 
-		var buf = make([]byte, 4096)
-		n, err := phone_conn.Read(buf)
+		for {
+			var buf = make([]byte, 4096)
+			n, err := phone_conn.Read(buf)
 
-		log.Println(device_name, "test conn return ", n, ":", string(buf[:n]))
+			log.Println(device_name, "test conn return ", n, ":", string(buf[:n]))
 
-		if n == 0 || err == io.EOF {
-			phone_conn.Close()
-			log.Println(device_name, "test conn return 0")
-			if i == 2 {
-				renderHtmlString(conn, "Phone is off line")
+			if err == io.EOF {
+				phone_conn.Close()
+				log.Println(device_name, "test conn return 0")
+				if i == 2 {
+					renderHtmlString(conn, "Phone is off line")
+					return
+				}
+			}
+
+			if err != nil {
+				log.Println(device_name, "test conn read error:", err)
+				renderHtmlFileAndClose(conn, "net_error.html")
+				phone_conn.Close()
 				return
 			}
-			time.Sleep(500 * time.Millisecond)
-			continue
-		}
 
-		if err != nil {
-			log.Println(device_name, "test conn read error:", err)
-			renderHtmlFileAndClose(conn, "net_error.html")
-			phone_conn.Close()
-			return
+			if string(buf[:n]) == "Webkey" {
+				renderHtmlString(conn, "Phone is OK")
+				log.Println(device_name, "test conn OK")
+				phone_conn.Close()
+				return
+			}
 		}
-
-		if string(buf[:n]) == "Webkey" {
-			renderHtmlString(conn, "Phone is OK")
-			log.Println(device_name, "test conn OK")
-			phone_conn.Close()
-			return
-		} else {
-			renderHtmlString(conn, "Phone is off line")
-			log.Println(device_name, "test conn off line")
-			phone_conn.Close()
-			return
-		}
+		phone_conn.Close()
 	}
 }
 
@@ -174,11 +169,11 @@ func processClientReq(conn net.TCPConn) {
 		return
 	}
 
-	if len(infos) > 2 && strings.HasPrefix(infos[2], "phone.html") {
-		renderHtmlFileAndClose(conn, "phone.html")
-		log.Println(device_name + " phone.html")
-		return
-	}
+	//if len(infos) > 2 && strings.HasPrefix(infos[2], "phone.html") {
+	//	renderHtmlFileAndClose(conn, "phone.html")
+	//	log.Println(device_name + " phone.html")
+	//	return
+	//}
 
 	if (strings.Contains(uri, "/testconn")) {
 		processTestConn(device_name, conn)
@@ -217,7 +212,7 @@ func processClientReq(conn net.TCPConn) {
 		var buf = make([]byte, 4096)
 		n, err := phone_conn.Read(buf)
 
-		if n == 0 || err == io.EOF {
+		if err == io.EOF {
 			break
 		}
 
