@@ -23,6 +23,11 @@ Connection: close
 
 `
 
+var testReq = `GET /test HTTP/1.1
+HOST: anything
+
+`
+
 func renderHtmlFileAndClose(conn net.TCPConn, tpl string) {
 	defer conn.Close()
 
@@ -64,7 +69,7 @@ func processTestConn(device_name string, conn net.TCPConn) {
 				return
 			}
 
-			data := []byte("GET /test HTTP/1.1\r\nHOST: anything\r\n\r\n")
+			data := []byte(testReq)
 			_, err = phone_conn.Write(data)
 			if err != nil {
 				log.Println("send error", err)
