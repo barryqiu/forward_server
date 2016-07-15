@@ -51,6 +51,56 @@ func renderHtmlString(conn net.TCPConn, content string) {
 	return
 }
 
+func processTestConn(device_name string, conn net.TCPConn) {
+	defer conn.Close()
+	for i := 0; i < 3; i++ {
+		var phone_conn net.TCPConn
+		for {
+			phone_conn, err := phones[device_name].get_conn()
+			if (net.TCPConn{}) == phone_conn || err != nil {
+				log.Println(device_name, "test conn no phone conn error:", err)
+				renderHtmlFileAndClose(conn, "net_error.html")
+				return
+			}
+
+			data := []byte("GET /test HTTP/1.1\r\nHOST: anything\r\n\r\n")
+			_, err = phone_conn.Write(data)
+			if err != nil {
+				log.Println("send error", err)
+			} else {
+				break
+			}
+			phone_conn.Close()
+		}
+
+		var buf = make([]byte, 4096)
+		n, err := phone_conn.Read(buf)
+
+		if n == 0 || err == io.EOF {
+			phone_conn.Close()
+			continue
+		}
+
+		if err != nil {
+			log.Println(device_name, "test conn read error:", err)
+			renderHtmlFileAndClose(conn, "net_error.html")
+			phone_conn.Close()
+			return
+		}
+
+		if string(buf[:n]) == "Webkey" {
+			renderHtmlString(conn, "Phone is OK")
+			log.Println(device_name, "test conn OK")
+			phone_conn.Close()
+			break
+		} else {
+			renderHtmlString(conn, "Phone is off line")
+			log.Println(device_name, "test conn off line")
+			phone_conn.Close()
+		}
+	}
+}
+
 func processClientReq(conn net.TCPConn) {
 
 	if (net.TCPConn{}) == conn {
@@ -115,6 +165,12 @@ func processClientReq(conn net.TCPConn) {
 		return
 	}
 
+	if (strings.Contains(uri, "/testconn")) {
+		processTestConn(device_name, conn)
+		log.Println(device_name + " testconn")
+		return
+	}
+
 
 	// if uri like /device_name
 	if len(infos) == 2 {
@@ -122,25 +178,16 @@ func processClientReq(conn net.TCPConn) {
 	}
 
 	var phone_conn net.TCPConn
-	var isTest = false
 	for {
 		phone_conn, err = phones[device_name].get_conn()
 		if (net.TCPConn{}) == phone_conn || err != nil {
 			log.Println("no phone conn error:", err)
-			if (strings.Contains(uri, "/testconn")) {
-				log.Println("test no phone conn error:", err)
-			}
 			renderHtmlFileAndClose(conn, "net_error.html")
 			return
 		}
 
 		new_header := bytes.Replace(header, [] byte("/" + device_name), []byte(""), 1)
 		data := append(new_header, body...)
-		if (strings.Contains(uri, "/testconn")) {
-			isTest = true
-			data = []byte("GET /test HTTP/1.1\r\nHOST: anything\r\n\r\n")
-			log.Println(device_name, "test conn")
-		}
 		_, err = phone_conn.Write(data)
 		//log.Println("new request data", string(data))
 		if err != nil {
@@ -168,21 +215,7 @@ func processClientReq(conn net.TCPConn) {
 
 		data_len += n
 
-		if isTest == true {
-			if string(buf[:n]) == "Webkey" {
-				renderHtmlString(conn, "Phone is OK")
-				log.Println(uri, "test OK")
-			} else {
-				renderHtmlString(conn, "Phone is off line")
-				log.Println(uri, "test off line")
-			}
-			break
-		}
 		conn.Write(buf[:n])
-	}
-	if isTest == true && data_len == 0 {
-		renderHtmlString(conn, "Phone is off line")
-		log.Println(uri, "test off line")
 	}
 	conn.Close()
 	log.Println(uri, "receive", data_len)
