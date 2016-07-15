@@ -78,6 +78,11 @@ func processTestConn(device_name string, conn net.TCPConn) {
 
 		if n == 0 || err == io.EOF {
 			phone_conn.Close()
+			log.Println(device_name, "test conn return 0")
+			if i == 2 {
+				renderHtmlString(conn, "Phone is off line")
+				return
+			}
 			continue
 		}
 
@@ -92,11 +97,12 @@ func processTestConn(device_name string, conn net.TCPConn) {
 			renderHtmlString(conn, "Phone is OK")
 			log.Println(device_name, "test conn OK")
 			phone_conn.Close()
-			break
+			return
 		} else {
 			renderHtmlString(conn, "Phone is off line")
 			log.Println(device_name, "test conn off line")
 			phone_conn.Close()
+			return
 		}
 	}
 }
@@ -167,7 +173,6 @@ func processClientReq(conn net.TCPConn) {
 
 	if (strings.Contains(uri, "/testconn")) {
 		processTestConn(device_name, conn)
-		log.Println(device_name + " testconn")
 		return
 	}
 
