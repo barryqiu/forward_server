@@ -85,7 +85,6 @@ func processTestConn(device_name string, conn net.TCPConn) {
 			log.Println(device_name, "test conn return ", n, ":", string(buf[:n]))
 
 			if err == io.EOF {
-				phone_conn.Close()
 				log.Println(device_name, "test conn return 0")
 				break
 				if i == 2 {
