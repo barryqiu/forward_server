@@ -78,8 +78,8 @@ func processTestConn(device_name string, conn net.TCPConn) {
 			phone_conn.Close()
 		}
 
+		var buf = make([]byte, 4096)
 		for {
-			var buf = make([]byte, 4096)
 			n, err := phone_conn.Read(buf)
 
 			log.Println(device_name, "test conn return ", n, ":", string(buf[:n]))
