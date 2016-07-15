@@ -170,11 +170,11 @@ func processClientReq(conn net.TCPConn) {
 		return
 	}
 
-	//if len(infos) > 2 && strings.HasPrefix(infos[2], "phone.html") {
-	//	renderHtmlFileAndClose(conn, "phone.html")
-	//	log.Println(device_name + " phone.html")
-	//	return
-	//}
+	if len(infos) > 2 && strings.HasPrefix(infos[2], "phone.html") {
+		renderHtmlFileAndClose(conn, "phone.html")
+		log.Println(device_name + " phone.html")
+		return
+	}
 
 	if (strings.Contains(uri, "/testconn")) {
 		processTestConn(device_name, conn)

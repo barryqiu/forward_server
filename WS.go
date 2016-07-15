@@ -261,7 +261,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 				var buf = make([]byte, 4096)
 				n, err := phone_conn.Read(buf)
 
-				if n == 0 || err == io.EOF {
+				if err == io.EOF {
 					break
 				}
 
