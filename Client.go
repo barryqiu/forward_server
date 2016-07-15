@@ -60,8 +60,9 @@ func processTestConn(device_name string, conn net.TCPConn) {
 	defer conn.Close()
 	for i := 0; i < 3; i++ {
 		var phone_conn net.TCPConn
+		var err error
 		for {
-			phone_conn, err := phones[device_name].get_conn()
+			phone_conn, err = phones[device_name].get_conn()
 			if (net.TCPConn{}) == phone_conn || err != nil {
 				log.Println(device_name, "test conn no phone conn error:", err)
 				renderHtmlFileAndClose(conn, "net_error.html")
