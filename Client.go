@@ -82,7 +82,7 @@ func processTestConn(device_name string, conn net.TCPConn) {
 		var buf = make([]byte, 4096)
 		n, err := phone_conn.Read(buf)
 
-		log.Println(device_name, "test conn return ", n)
+		log.Println(device_name, "test conn return ", n, ":", string(buf[:n]))
 
 		if n == 0 || err == io.EOF {
 			phone_conn.Close()
