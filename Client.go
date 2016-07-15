@@ -7,6 +7,7 @@ import (
 	"strings"
 	"io"
 	"os"
+	"time"
 )
 // 策略:
 // 使用一个全局的slice数组存储所有的Phone
@@ -83,6 +84,7 @@ func processTestConn(device_name string, conn net.TCPConn) {
 				renderHtmlString(conn, "Phone is off line")
 				return
 			}
+			time.Sleep(500 * time.Millisecond)
 			continue
 		}
 
