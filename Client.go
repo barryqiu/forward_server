@@ -64,7 +64,8 @@ func processTestConn(device_name string, conn net.TCPConn) {
 		for {
 			phone_conn, err = phones[device_name].get_conn()
 			if (net.TCPConn{}) == phone_conn || err != nil {
-				log.Println(device_name, "test conn no phone conn error:", err)
+				phones[device_name].log_to_file(device_name, "test conn no phone conn error:", err)
+				//log.Println(device_name, "test conn no phone conn error:", err)
 				renderHtmlFileAndClose(conn, "net_error.html")
 				return
 			}
@@ -72,7 +73,8 @@ func processTestConn(device_name string, conn net.TCPConn) {
 			data := []byte(testReq)
 			_, err = phone_conn.Write(data)
 			if err != nil {
-				log.Println("send error", err)
+				phones[device_name].log_to_file("send error", err)
+				//log.Println("send error", err)
 			} else {
 				break
 			}
@@ -83,10 +85,12 @@ func processTestConn(device_name string, conn net.TCPConn) {
 		for {
 			n, err := phone_conn.Read(buf)
 
-			log.Println(device_name, "test conn return ", n, ":", string(buf[:n]))
+			//log.Println(device_name, "test conn return ", n, ":", string(buf[:n]))
+			phones[device_name].log_to_file(device_name, "test conn return ", n, ":", string(buf[:n]))
 
 			if err == io.EOF {
-				log.Println(device_name, "test conn return 0")
+				//log.Println(device_name, "test conn return 0")
+				phones[device_name].log_to_file(device_name, "test conn return 0")
 				break
 				if i == 2 {
 					renderHtmlString(conn, "Phone is off line")
@@ -95,7 +99,8 @@ func processTestConn(device_name string, conn net.TCPConn) {
 			}
 
 			if err != nil {
-				log.Println(device_name, "test conn read error:", err)
+				//log.Println(device_name, "test conn read error:", err)
+				phones[device_name].log_to_file(device_name, "test conn read error:", err)
 				renderHtmlFileAndClose(conn, "net_error.html")
 				phone_conn.Close()
 				return
@@ -103,7 +108,8 @@ func processTestConn(device_name string, conn net.TCPConn) {
 
 			if string(buf[:n]) == "Webkey" {
 				renderHtmlString(conn, "Phone is OK")
-				log.Println(device_name, "test conn OK")
+				phones[device_name].log_to_file(device_name, "test conn OK")
+				//log.Println(device_name, "test conn OK")
 				phone_conn.Close()
 				return
 			}
@@ -172,7 +178,8 @@ func processClientReq(conn net.TCPConn) {
 
 	if len(infos) > 2 && strings.HasPrefix(infos[2], "phone.html") {
 		renderHtmlFileAndClose(conn, "phone.html")
-		log.Println(device_name + " phone.html")
+		phones[device_name].log_to_file(device_name + " phone.html")
+		//log.Println(device_name + " phone.html")
 		return
 	}
 
@@ -191,7 +198,8 @@ func processClientReq(conn net.TCPConn) {
 	for {
 		phone_conn, err = phones[device_name].get_conn()
 		if (net.TCPConn{}) == phone_conn || err != nil {
-			log.Println("no phone conn error:", err)
+			phones[device_name].log_to_file("no phone conn error:", err)
+			//log.Println("no phone conn error:", err)
 			renderHtmlFileAndClose(conn, "net_error.html")
 			return
 		}
@@ -201,7 +209,8 @@ func processClientReq(conn net.TCPConn) {
 		_, err = phone_conn.Write(data)
 		//log.Println("new request data", string(data))
 		if err != nil {
-			log.Println("send error", err)
+			phones[device_name].log_to_file("send error", err)
+			//log.Println("send error", err)
 		} else {
 			break
 		}
@@ -218,7 +227,8 @@ func processClientReq(conn net.TCPConn) {
 		}
 
 		if err != nil {
-			log.Println("conn read error:", err)
+			//log.Println("conn read error:", err)
+			phones[device_name].log_to_file("conn read error:", err)
 			renderHtmlFileAndClose(conn, "net_error.html")
 			return
 		}
@@ -228,6 +238,7 @@ func processClientReq(conn net.TCPConn) {
 		conn.Write(buf[:n])
 	}
 	conn.Close()
-	log.Println(uri, "receive", data_len)
+	phones[device_name].log_to_file(uri, "receive", data_len)
+	//log.Println(uri, "receive", data_len)
 	phone_conn.Close()
 }

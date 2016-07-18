@@ -187,7 +187,6 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			break
 		}
 		err = json.Unmarshal(message, &clientParam)
-		log.Printf("json : %v\n", clientParam)
 		device_type = string(clientParam.DeviceType)
 		break
 	}
@@ -215,6 +214,9 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	phones[device_name].log_to_file(fmt.Sprintf("param : %v", clientParam))
+	//log.Printf("param : %v\n", clientParam)
+
 	clientConn := &ClientConn{send: make(chan []byte, 4096), ws: conn, stop: make(chan int)}
 
 	go clientConn.writePump()
@@ -224,7 +226,8 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		select {
 		case stop := <-clientConn.stop:
 			if stop == 1 {
-				log.Println("client close, stop fetch data")
+				phones[device_name].log_to_file("client close, stop fetch data")
+				//log.Println("client close, stop fetch data")
 				return
 			}
 		default:
@@ -232,7 +235,8 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			for {
 				phone_conn, err = phones[device_name].get_conn()
 				if (net.TCPConn{}) == phone_conn || err != nil {
-					log.Println("no phone conn error:", err)
+					phones[device_name].log_to_file("no phone conn error:", err)
+					//log.Println("no phone conn error:", err)
 					conn.WriteMessage(websocket.TextMessage, []byte("no phone conn error"))
 					conn.Close()
 					return
@@ -240,14 +244,16 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 				if device_type == "h" {
 					_, err = phone_conn.Write([]byte(sendHRequestContent))
 					if err != nil {
-						log.Println("send error", err)
+						//log.Println("send error", err)
+						phones[device_name].log_to_file("send error", err)
 					} else {
 						break
 					}
 				} else {
 					_, err = phone_conn.Write([]byte(sendVRequestContent))
 					if err != nil {
-						log.Println("send error", err)
+						//log.Println("send error", err)
+						phones[device_name].log_to_file("send error", err)
 					} else {
 						break
 					}
@@ -266,7 +272,8 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 				}
 
 				if err != nil {
-					log.Println("conn read error:", err)
+					//log.Println("conn read error:", err)
+					phones[device_name].log_to_file("conn read error:", err)
 					//conn.WriteMessage(websocket.TextMessage, []byte("no data error"))
 					return
 				}
@@ -281,7 +288,8 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 
 			}
 			clientConn.send <- data
-			log.Println(uri, "send", len(data))
+			//log.Println(uri, "send", len(data))
+			phones[device_name].log_to_file(uri, "send", len(data))
 			phone_conn.Close()
 			time.Sleep(time.Millisecond * 50)
 		}
