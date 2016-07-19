@@ -173,6 +173,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		conn.Close()
 		return
 	}
+	log.Println("receive client conn from address", conn.RemoteAddr().String())
 	conn.WriteMessage(websocket.TextMessage, []byte(`{"action":"init","width":960,"height":540}`))
 
 	device_type := "v"

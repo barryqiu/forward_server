@@ -123,6 +123,9 @@ func processClientReq(conn net.TCPConn) {
 	if (net.TCPConn{}) == conn {
 		return
 	}
+
+	log.Println("receive client conn from address", conn.RemoteAddr().String())
+
 	var content []byte
 	var header []byte
 	var body []byte

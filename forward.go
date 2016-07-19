@@ -19,7 +19,7 @@ func main() {
 
 	string_date := current_date_string()
 	os.MkdirAll("log" + string(filepath.Separator) + string_date, 06660)
-	log_file_name := "log" + string(filepath.Separator) + string_date + string(filepath.Separator) + "info.log"
+	log_file_name := "log" + string(filepath.Separator) + "info.log"
 	f, err := os.OpenFile(log_file_name, os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
 	if err != nil {
 		return
