@@ -7,6 +7,7 @@ import (
 	"strings"
 	"io"
 	"os"
+	"time"
 )
 // 策略:
 // 使用一个全局的slice数组存储所有的Phone
@@ -58,7 +59,7 @@ func renderHtmlString(conn net.TCPConn, content string) {
 
 func processTestConn(device_name string, conn net.TCPConn) {
 	defer conn.Close()
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 4; i++ {
 		var phone_conn net.TCPConn
 		var err error
 		for {
@@ -114,6 +115,7 @@ func processTestConn(device_name string, conn net.TCPConn) {
 				return
 			}
 		}
+		time.Sleep(50 * time.Millisecond)
 		phone_conn.Close()
 	}
 }
