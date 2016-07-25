@@ -210,9 +210,14 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 	//}
 
 	if _, ok := phones[device_name]; !ok {
-		log.Println(device_name + " not exist")
-		conn.Close()
-		return
+		device_map, err := trans_phone_address(device_name)
+		if _, ok := phones[device_map]; err == nil && ok{
+			device_name = device_map
+		}else {
+			log.Println(device_name + " not exist")
+			conn.Close()
+			return
+		}
 	}
 
 	phones[device_name].log_to_file(fmt.Sprintf("param : %v", clientParam))

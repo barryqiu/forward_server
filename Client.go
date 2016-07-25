@@ -176,9 +176,14 @@ func processClientReq(conn net.TCPConn) {
 	device_name := infos[1]
 
 	if _, ok := phones[device_name]; !ok {
-		renderHtmlFileAndClose(conn, "404.html")
-		log.Println(device_name + " not exist")
-		return
+		device_map, err := trans_phone_address(device_name)
+		if _, ok := phones[device_map]; err == nil && ok{
+			device_name = device_map
+		}else {
+			renderHtmlFileAndClose(conn, "404.html")
+			log.Println(device_name + " not exist")
+			return
+		}
 	}
 
 	if len(infos) > 2 && strings.HasPrefix(infos[2], "phone.html") {

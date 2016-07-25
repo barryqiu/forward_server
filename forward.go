@@ -10,10 +10,12 @@ import (
 	"fmt"
 	"time"
 	"path/filepath"
+	"github.com/garyburd/redigo/redis"
 )
 
 var phones map[string]*Phone
 var db_file_name string = "phones.txt"
+var redis_conn redis.Conn
 
 func main() {
 
@@ -24,7 +26,15 @@ func main() {
 	if err != nil {
 		return
 	}
-	defer f.Close()
+
+	redis_conn, err = redis.DialURL("redis://:doodod123@localhost:6542/0")
+	if err != nil {
+		log.Println("conn redis error:", err)
+	}
+	defer func() {
+		redis_conn.Close()
+		f.Close()
+	}()
 
 	log.SetOutput(f)
 

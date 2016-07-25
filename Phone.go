@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"github.com/garyburd/redigo/redis"
 )
 
 type Phone struct {
@@ -159,6 +160,21 @@ func (phone *Phone) log_to_file(v ...interface{}) error {
 	}
 	fl.WriteString("[" + string_time + "]" +fmt.Sprintln(v...))
 	return nil
+}
+
+/**
+trans phone  address
+ */
+func trans_phone_address(address_map string) (string, error) {
+	redis_key := fmt.Sprintf("YUNPHONE:DEVICE:MAP:%s", address_map)
+	redis_key = strings.ToUpper(redis_key)
+	device_name, err :=redis.String(redis_conn.Do("GET", redis_key))
+	if err != nil {
+		log.Println("REDIS GET ERROR", redis_key, err)
+		return "", err;
+	}
+	log.Println("REDIS GET ", redis_key, ": ", device_name)
+	return device_name, err
 }
 
 /**
