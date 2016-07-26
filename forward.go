@@ -15,7 +15,10 @@ import (
 
 var phones map[string]*Phone
 var db_file_name string = "phones.txt"
-var redis_conn redis.Conn
+
+func getRedisConn() (redis.Conn,error) {
+	return  redis.DialURL("redis://:doodod123@localhost:6542/0")
+}
 
 func main() {
 
@@ -27,12 +30,7 @@ func main() {
 		return
 	}
 
-	redis_conn, err = redis.DialURL("redis://:doodod123@localhost:6542/0")
-	if err != nil {
-		log.Println("conn redis error:", err)
-	}
 	defer func() {
-		redis_conn.Close()
 		f.Close()
 	}()
 

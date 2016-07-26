@@ -168,6 +168,12 @@ trans phone  address
 func trans_phone_address(address_map string) (string, error) {
 	redis_key := fmt.Sprintf("YUNPHONE:DEVICE:MAP:%s", address_map)
 	redis_key = strings.ToUpper(redis_key)
+	redis_conn, err := getRedisConn()
+	defer redis_conn.Close()
+	if err != nil {
+		log.Println("REDIS CONN ERROR", redis_key, err)
+		return "", err;
+	}
 	device_name, err :=redis.String(redis_conn.Do("GET", redis_key))
 	if err != nil {
 		log.Println("REDIS GET ERROR", redis_key, err)
