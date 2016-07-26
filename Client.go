@@ -173,6 +173,7 @@ func processClientReq(conn net.TCPConn) {
 		return
 	}
 	device_name := infos[1]
+	old_device_name := device_name
 
 	if _, ok := phones[device_name]; !ok {
 		device_map, err := trans_phone_address(device_name)
@@ -200,7 +201,7 @@ func processClientReq(conn net.TCPConn) {
 
 	// if uri like /device_name
 	if len(infos) == 2 {
-		header = bytes.Replace(header, [] byte(device_name), []byte(device_name + "/"), 1)
+		header = bytes.Replace(header, [] byte(old_device_name), []byte(old_device_name + "/"), 1)
 	}
 
 	var phone_conn net.TCPConn
@@ -213,7 +214,7 @@ func processClientReq(conn net.TCPConn) {
 			return
 		}
 
-		new_header := bytes.Replace(header, [] byte("/" + device_name), []byte(""), 1)
+		new_header := bytes.Replace(header, [] byte("/" + old_device_name), []byte(""), 1)
 		data := append(new_header, body...)
 		_, err = phone_conn.Write(data)
 		//log.Println("new request data", string(data))
