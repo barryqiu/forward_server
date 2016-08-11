@@ -79,6 +79,7 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 	}
 
 	phone.log_to_file("append a conn", conn.RemoteAddr().String())
+	phone.log_to_file("phone conn list size______", len(phone.Conn_list))
 
 	phone.mu.Unlock()
 	return nil
