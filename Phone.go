@@ -39,24 +39,13 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 
 	phone.Conn_list = append(phone.Conn_list, conn)
 
-	if len(phone.Conn_list) > 3 + phone.Overhead {
+	if len(phone.Conn_list) > 6 {
 		conn0 := phone.Conn_list[0]
 		err = conn0.Close()
 		if err != nil {
 			phone.log_to_file("close conn error:", err)
 		}
 		phone.Conn_list = phone.Conn_list[1:]
-
-		phone.Overheat_count += 1
-		if phone.Overheat_count > 100 {
-			phone.Overheat_count = 0
-			if phone.Overhead > 10 {
-				phone.Overhead = 10
-			} else {
-				phone.Overhead = phone.Overhead + 1
-			}
-		}
-
 	}
 
 	address := conn.RemoteAddr()
