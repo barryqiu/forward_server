@@ -39,7 +39,7 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 
 	phone.Conn_list = append(phone.Conn_list, conn)
 
-	if len(phone.Conn_list) > 6 {
+	if len(phone.Conn_list) > 4 {
 		conn0 := phone.Conn_list[0]
 		err = conn0.Close()
 		if err != nil {
