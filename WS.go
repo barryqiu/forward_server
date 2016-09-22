@@ -97,6 +97,7 @@ func judge_auth(token string, deviceName string) error {
 }
 
 type ClientConn struct {
+	alias string
 	ws   *websocket.Conn
 	stop chan int
 	send chan []byte
@@ -161,6 +162,14 @@ func (c *ClientConn) writePump() {
 			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
 				return
 			}
+			if (c.alias != ""){
+				// 判断地址是否还存在，如果不存在则应该停止WS
+				device_map, err := trans_phone_address(c.alias)
+				if _, ok := phones[device_map]; err == nil && !ok{
+					log.Printf("phone map not exist, clost ws %v", c.alias)
+					return
+				}
+			}
 		}
 	}
 }
@@ -201,6 +210,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	device_name := infos[1]
+	alias := ""
 
 	//err = judge_auth(clientParam.token,device_name)
 	//if err != nil{
@@ -212,6 +222,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 	if _, ok := phones[device_name]; !ok {
 		device_map, err := trans_phone_address(device_name)
 		if _, ok := phones[device_map]; err == nil && ok{
+			alias = device_name
 			device_name = device_map
 		}else {
 			log.Println(device_name + " not exist")
@@ -223,7 +234,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 	phones[device_name].log_to_file(fmt.Sprintf("param : %v", clientParam))
 	//log.Printf("param : %v\n", clientParam)
 
-	clientConn := &ClientConn{send: make(chan []byte, 4096), ws: conn, stop: make(chan int)}
+	clientConn := &ClientConn{send: make(chan []byte, 4096), ws: conn, stop: make(chan int), alias: alias}
 
 	go clientConn.writePump()
 	go clientConn.readPump()
