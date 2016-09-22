@@ -162,10 +162,11 @@ func (c *ClientConn) writePump() {
 			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
 				return
 			}
+			log.Printf("%v tick", c.alias)
 			if (c.alias != ""){
 				// 判断地址是否还存在，如果不存在则应该停止WS
 				device_map, err := trans_phone_address(c.alias)
-				if _, ok := phones[device_map]; err == nil && !ok{
+				if _, ok := phones[device_map]; err != nil || !ok{
 					log.Printf("phone map not exist, clost ws %v", c.alias)
 					return
 				}
