@@ -250,14 +250,20 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			}
 		default:
 			var phone_conn net.TCPConn
+			retry := 0
 			for {
 				phone_conn, err = phones[device_name].get_conn()
 				if (net.TCPConn{}) == phone_conn || err != nil {
 					phones[device_name].log_to_file("no phone conn error:", err)
 					//log.Println("no phone conn error:", err)
-					conn.WriteMessage(websocket.TextMessage, []byte("no phone conn error"))
-					conn.Close()
-					return
+					if (retry >= 3) {
+						conn.WriteMessage(websocket.TextMessage, []byte("no phone conn error"))
+						conn.Close()
+						return
+					}
+					retry++
+					time.Sleep(time.Millisecond * 50)
+					continue
 				}
 				if device_type == "h" {
 					_, err = phone_conn.Write([]byte(sendHRequestContent))
