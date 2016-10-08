@@ -11,12 +11,12 @@ import (
 	//"time"
 	"bytes"
 	"time"
-	"io/ioutil"
+	//"io/ioutil"
 	"fmt"
-	"encoding/base64"
+	//"encoding/base64"
 	//"os"
 	"encoding/json"
-	"errors"
+	//"errors"
 )
 
 var (
@@ -58,43 +58,43 @@ type ClientParam struct {
 	Token       string `json:"token"`
 }
 
-func judge_auth(token string, deviceName string) error {
-	//os.Setenv("HTTP_PROXY", "http://proxy.tencent.com:8080")
-	client := &http.Client{}
-
-	req, err := http.NewRequest("GET", "http://yunphone.shinegame.cn/api/1.1/device/user", nil)
-	if err != nil {
-		errors.New("http error")
-	}
-
-	base64Token := base64.StdEncoding.EncodeToString([]byte(token + ":"))
-
-	req.Header.Set("Authorization", fmt.Sprintf("Basic %s", base64Token))
-	resp, err := client.Do(req)
-
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		errors.New("http error")
-	}
-
-	var f interface{}
-	err = json.Unmarshal(body, &f)
-
-	data := f.(map[string]interface{})
-	content := data["content"]
-	devices := content.([]interface{})
-	for _, device := range devices {
-		device_map := device.(map[string]interface{})
-		device_name := device_map["device_name"].(string)
-		if device_name == deviceName {
-			return nil
-		}
-	}
-
-	return errors.New("no auth")
-}
+//func judge_auth(token string, deviceName string) error {
+//	//os.Setenv("HTTP_PROXY", "http://proxy.tencent.com:8080")
+//	client := &http.Client{}
+//
+//	req, err := http.NewRequest("GET", "http://yunphone.shinegame.cn/api/1.1/device/user", nil)
+//	if err != nil {
+//		errors.New("http error")
+//	}
+//
+//	base64Token := base64.StdEncoding.EncodeToString([]byte(token + ":"))
+//
+//	req.Header.Set("Authorization", fmt.Sprintf("Basic %s", base64Token))
+//	resp, err := client.Do(req)
+//
+//	defer resp.Body.Close()
+//
+//	body, err := ioutil.ReadAll(resp.Body)
+//	if err != nil {
+//		errors.New("http error")
+//	}
+//
+//	var f interface{}
+//	err = json.Unmarshal(body, &f)
+//
+//	data := f.(map[string]interface{})
+//	content := data["content"]
+//	devices := content.([]interface{})
+//	for _, device := range devices {
+//		device_map := device.(map[string]interface{})
+//		device_name := device_map["device_name"].(string)
+//		if device_name == deviceName {
+//			return nil
+//		}
+//	}
+//
+//	return errors.New("no auth")
+//}
 
 type ClientConn struct {
 	alias string
