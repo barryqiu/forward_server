@@ -119,6 +119,7 @@ func (c *ClientConn) readPump() {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 				log.Printf("error: %v", err)
 			}
+			log.Printf("%v c.ws.ReadMessage", err)
 			break
 		}
 	}
@@ -143,6 +144,7 @@ func (c *ClientConn) writePump() {
 		case message, ok := <-c.send:
 			if !ok {
 				// The hub closed the channel.
+				log.Printf("%v c.send not ok", ok)
 				c.write(websocket.CloseMessage, []byte{})
 				return
 			}
@@ -150,16 +152,19 @@ func (c *ClientConn) writePump() {
 			c.ws.SetWriteDeadline(time.Now().Add(writeWait))
 			w, err := c.ws.NextWriter(websocket.BinaryMessage)
 			if err != nil {
+				log.Printf("%v NextWriter", err)
 				return
 			}
 
 			w.Write(message)
 
 			if err := w.Close(); err != nil {
+				log.Printf("%v w.Close", err)
 				return
 			}
 		case <-ticker.C:
 			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
+				log.Printf("%v write ping message", err)
 				return
 			}
 			log.Printf("%v tick", c.alias)
