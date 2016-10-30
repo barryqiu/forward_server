@@ -55,7 +55,7 @@ const (
 
 type ClientParam struct {
 	DeviceType string `json:"type"`
-	Token       string `json:"token"`
+	Token      string `json:"token"`
 }
 
 //func judge_auth(token string, deviceName string) error {
@@ -98,9 +98,9 @@ type ClientParam struct {
 
 type ClientConn struct {
 	alias string
-	ws   *websocket.Conn
-	stop chan int
-	send chan []byte
+	ws    *websocket.Conn
+	stop  chan int
+	send  chan []byte
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -168,10 +168,10 @@ func (c *ClientConn) writePump() {
 				return
 			}
 			log.Printf("%v tick", c.alias)
-			if (c.alias != ""){
+			if (c.alias != "") {
 				// 判断地址是否还存在，如果不存在则应该停止WS
 				device_map, err := trans_phone_address(c.alias)
-				if _, ok := phones[device_map]; err != nil || !ok{
+				if _, ok := phones[device_map]; err != nil || !ok {
 					log.Printf("phone map not exist, clost ws %v", c.alias)
 					return
 				}
@@ -227,10 +227,10 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 
 	if _, ok := phones[device_name]; !ok {
 		device_map, err := trans_phone_address(device_name)
-		if _, ok := phones[device_map]; err == nil && ok{
+		if _, ok := phones[device_map]; err == nil && ok {
 			alias = device_name
 			device_name = device_map
-		}else {
+		} else {
 			log.Println(device_name + " not exist")
 			conn.Close()
 			return
@@ -245,12 +245,15 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 	go clientConn.writePump()
 	go clientConn.readPump()
 
+	set_phone_ws_state_in_redis(device_name, 1)
+
 	for {
 		select {
 		case stop := <-clientConn.stop:
 			if stop == 1 {
 				phones[device_name].log_to_file("client close, stop fetch data")
 				//log.Println("client close, stop fetch data")
+				set_phone_ws_state_in_redis(device_name, 0)
 				return
 			}
 		default:
@@ -264,6 +267,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 					if (retry >= 3) {
 						conn.WriteMessage(websocket.TextMessage, []byte("no phone conn error"))
 						conn.Close()
+						set_phone_ws_state_in_redis(device_name, 0)
 						return
 					}
 					retry++
@@ -304,6 +308,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 					//log.Println("conn read error:", err)
 					phones[device_name].log_to_file("conn read error:", err)
 					//conn.WriteMessage(websocket.TextMessage, []byte("no data error"))
+					set_phone_ws_state_in_redis(device_name, 0)
 					return
 				}
 				start_index := 0
@@ -317,7 +322,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 
 			}
 			clientConn.send <- data
-			//log.Println(uri, "send", len(data))
+		//log.Println(uri, "send", len(data))
 			phones[device_name].log_to_file(uri, "send", len(data))
 			phone_conn.Close()
 			time.Sleep(time.Millisecond * 50)

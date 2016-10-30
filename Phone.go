@@ -148,7 +148,7 @@ func (phone *Phone) log_to_file(v ...interface{}) error {
 		log.Println("open file error", err)
 		return err
 	}
-	fl.WriteString("[" + string_time + "]" +fmt.Sprintln(v...))
+	fl.WriteString("[" + string_time + "]" + fmt.Sprintln(v...))
 	return nil
 }
 
@@ -164,13 +164,37 @@ func trans_phone_address(address_map string) (string, error) {
 		log.Println("REDIS CONN ERROR", redis_key, err)
 		return "", err;
 	}
-	device_name, err :=redis.String(redis_conn.Do("GET", redis_key))
+	device_name, err := redis.String(redis_conn.Do("GET", redis_key))
 	if err != nil {
 		log.Println("REDIS GET ERROR", redis_key, err)
 		return "", err;
 	}
 	log.Println("REDIS GET ", redis_key, ": ", device_name)
 	return device_name, err
+}
+
+/**
+trans phone  address
+ */
+func set_phone_ws_state_in_redis(phone_name string, state int) (error) {
+	if _, ok := phones[phone_name]; !ok {
+		return errors.New("phone not exist")
+	}
+	redis_key := fmt.Sprintf("YUNPHONE:DEVICE:WS:STATE:%s", phone_name)
+	redis_key = strings.ToUpper(redis_key)
+	redis_conn, err := getRedisConn()
+	defer redis_conn.Close()
+	if err != nil {
+		phones[phone_name].log_to_file("REDIS CONN ERROR", redis_key, err)
+		return err;
+	}
+	device_name, err := redis.String(redis_conn.Do("SET", redis_key, state))
+	if err != nil {
+		phones[phone_name].log_to_file("REDIS GET ERROR", redis_key, err)
+		return err;
+	}
+	phones[phone_name].log_to_file("REDIS SET ", redis_key, ": ", device_name)
+	return  err
 }
 
 /**
