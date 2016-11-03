@@ -197,6 +197,27 @@ func set_phone_ws_state_in_redis(phone_name string, state int) (error) {
 	return  err
 }
 
+func get_phone_ws_state_in_redis(phone_name string) (int) {
+	if _, ok := phones[phone_name]; !ok {
+		return 0
+	}
+	redis_key := fmt.Sprintf("YUNPHONE:DEVICE:WS:STATE:%s", phone_name)
+	redis_key = strings.ToUpper(redis_key)
+	redis_conn, err := getRedisConn()
+	defer redis_conn.Close()
+	if err != nil {
+		phones[phone_name].log_to_file("REDIS CONN ERROR", redis_key, err)
+		return 0;
+	}
+	state, err := redis.Int(redis_conn.Do("GET", redis_key))
+	if err != nil {
+		phones[phone_name].log_to_file("REDIS GET ERROR", redis_key, err)
+		return 0;
+	}
+	phones[phone_name].log_to_file("REDIS GET WS State ", redis_key, ": ", state)
+	return  state
+}
+
 /**
 read phone‘s info from file
  */
