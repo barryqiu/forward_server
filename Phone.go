@@ -190,7 +190,7 @@ func set_phone_ws_state_in_redis(phone_name string, state int) (error) {
 	}
 	_, err = redis.String(redis_conn.Do("SET", redis_key, state))
 	if err != nil {
-		phones[phone_name].log_to_file("REDIS GET ERROR", redis_key, err)
+		phones[phone_name].log_to_file("REDIS SET ERROR", redis_key, err)
 		return err;
 	}
 	phones[phone_name].log_to_file("REDIS SET ", redis_key, ": ", phone_name, ":", state)
