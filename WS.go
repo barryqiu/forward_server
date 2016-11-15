@@ -24,7 +24,7 @@ var (
 
 	upGrader = websocket.Upgrader{} // use default options
 
-	sendVRequestContent = `GET /screenshot.jpg?vlfnnn14670333662470n HTTP/1.1
+	sendVRequestContent = `GET /screenshot.jpg?vlfnnnn14670333662470 HTTP/1.1
 Accept: image/webp,image/*,*/*;q=0.8
 Accept-Encoding: gzip, deflate, sdch
 Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
@@ -32,7 +32,7 @@ Cache-Control: max-age=259200
 Connection: keep-alive
 
 `
-	sendHRequestContent = `GET /screenshot.jpg?hlfnnn14670333662470n HTTP/1.1
+	sendHRequestContent = `GET /screenshot.jpg?hlfnnnn14670333662470 HTTP/1.1
 Accept: image/webp,image/*,*/*;q=0.8
 Accept-Encoding: gzip, deflate, sdch
 Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
@@ -41,7 +41,7 @@ Connection: keep-alive
 
 `
 
-	sendVRequestContentFirst = `GET /screenshot.jpg?vlfnnn14670333662470f HTTP/1.1
+	sendVRequestContentFirst = `GET /screenshot.jpg?vlfnnnf14670333662470 HTTP/1.1
 Accept: image/webp,image/*,*/*;q=0.8
 Accept-Encoding: gzip, deflate, sdch
 Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
@@ -49,7 +49,7 @@ Cache-Control: max-age=259200
 Connection: keep-alive
 
 `
-	sendHRequestContentFirst = `GET /screenshot.jpg?hlfnnn14670333662470f HTTP/1.1
+	sendHRequestContentFirst = `GET /screenshot.jpg?hlfnnnf14670333662470 HTTP/1.1
 Accept: image/webp,image/*,*/*;q=0.8
 Accept-Encoding: gzip, deflate, sdch
 Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
