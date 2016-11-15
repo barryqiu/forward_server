@@ -24,7 +24,7 @@ var (
 
 	upGrader = websocket.Upgrader{} // use default options
 
-	sendVRequestContent = `GET /screenshot.jpg?vlfnnn14670333662470 HTTP/1.1
+	sendVRequestContent = `GET /screenshot.jpg?vlfnnn14670333662470n HTTP/1.1
 Accept: image/webp,image/*,*/*;q=0.8
 Accept-Encoding: gzip, deflate, sdch
 Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
@@ -32,7 +32,24 @@ Cache-Control: max-age=259200
 Connection: keep-alive
 
 `
-	sendHRequestContent = `GET /screenshot.jpg?hlfnnn14670333662470 HTTP/1.1
+	sendHRequestContent = `GET /screenshot.jpg?hlfnnn14670333662470n HTTP/1.1
+Accept: image/webp,image/*,*/*;q=0.8
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
+Cache-Control: max-age=259200
+Connection: keep-alive
+
+`
+
+	sendVRequestContentFirst = `GET /screenshot.jpg?vlfnnn14670333662470f HTTP/1.1
+Accept: image/webp,image/*,*/*;q=0.8
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
+Cache-Control: max-age=259200
+Connection: keep-alive
+
+`
+	sendHRequestContentFirst = `GET /screenshot.jpg?hlfnnn14670333662470f HTTP/1.1
 Accept: image/webp,image/*,*/*;q=0.8
 Accept-Encoding: gzip, deflate, sdch
 Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
@@ -96,12 +113,29 @@ type ClientParam struct {
 //	return errors.New("no auth")
 //}
 
+func getSendContent(device_type string , first_frame bool ) string  {
+	if device_type == "h" {
+		if first_frame{
+			return sendHRequestContentFirst
+		}else {
+			return sendHRequestContent
+		}
+	}else {
+		if first_frame{
+			return sendVRequestContentFirst
+		}else {
+			return sendVRequestContent
+		}
+	}
+}
+
 type ClientConn struct {
 	alias string
 	ws    *websocket.Conn
 	stop  chan int
 	send  chan []byte
 }
+
 
 // readPump pumps messages from the websocket connection to the hub.
 func (c *ClientConn) readPump() {
@@ -254,7 +288,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 	go clientConn.readPump()
 
 	set_phone_ws_state_in_redis(device_name, 1)
-
+	first_frame := true
 	for {
 		select {
 		case stop := <-clientConn.stop:
@@ -282,22 +316,13 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 					time.Sleep(time.Millisecond * 50)
 					continue
 				}
-				if device_type == "h" {
-					_, err = phone_conn.Write([]byte(sendHRequestContent))
-					if err != nil {
-						//log.Println("send error", err)
-						phones[device_name].log_to_file("send error", err)
-					} else {
-						break
-					}
+				_, err = phone_conn.Write([]byte(getSendContent(device_type, first_frame)))
+				if err != nil {
+					//log.Println("send error", err)
+					phones[device_name].log_to_file("send error", err)
 				} else {
-					_, err = phone_conn.Write([]byte(sendVRequestContent))
-					if err != nil {
-						//log.Println("send error", err)
-						phones[device_name].log_to_file("send error", err)
-					} else {
-						break
-					}
+					first_frame = false
+					break
 				}
 				phone_conn.Close()
 			}
