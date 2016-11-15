@@ -75,6 +75,7 @@ type ClientParam struct {
 	Token      string `json:"token"`
 }
 
+
 //func judge_auth(token string, deviceName string) error {
 //	//os.Setenv("HTTP_PROXY", "http://proxy.tencent.com:8080")
 //	client := &http.Client{}
