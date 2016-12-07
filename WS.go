@@ -24,7 +24,6 @@ var (
 
 	upGrader = websocket.Upgrader{ReadBufferSize:4096, WriteBufferSize:40960} // use default options
 
-
 	sendVRequestContent = `GET /screenshot.jpg?vlfnnnn HTTP/1.1
 Accept: image/webp,image/*,*/*;q=0.8
 Accept-Encoding: gzip, deflate, sdch
